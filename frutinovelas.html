@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JM BOTS FRUTAS</title>
+<style>
+  :root{
+    --bg:#070707; --bg2:#0f0d0a; --ink:#f6f1e6; --muted:#9b927e;
+    --gold:#d4af37; --gold2:#f3d77a; --gold3:#b8902c; --gold-deep:#8a6c1e;
+    --card:#100e0b; --card2:#171410; --line:#3a3220; --ok:#e8c75a; --bad:#c0392b;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 560px at 82% -12%, rgba(212,175,55,.16), transparent 60%),
+      radial-gradient(800px 460px at 0% 8%, rgba(243,215,122,.07), transparent 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink); font-family:var(--sans); line-height:1.5; min-height:100vh;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.045;
+    background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px);
+    background-size:3px 3px;z-index:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px;position:relative;z-index:1}
+  header.brand{text-align:center;margin:8px 0 26px}
+  .logo{font-family:var(--serif);font-style:italic;font-weight:700;letter-spacing:1px;
+    font-size:clamp(34px,7vw,64px);line-height:.95;
+    background:linear-gradient(92deg,var(--gold3),var(--gold2) 45%,var(--gold) 70%,var(--gold-deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 46px rgba(212,175,55,.28)}
+  .tag{margin-top:8px;color:var(--muted);font-size:12.5px;letter-spacing:4px;text-transform:uppercase}
+  .ribbon{display:inline-block;margin-top:14px;font-size:12px;letter-spacing:1px;
+    border:1px solid var(--line);border-radius:999px;padding:6px 15px;color:var(--gold2);
+    background:rgba(212,175,55,.06)}
+  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+    border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 18px 56px rgba(0,0,0,.5)}
+  .step{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+  .num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;
+    width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:12px;
+    background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,var(--gold-deep));color:#100c04;
+    box-shadow:0 0 0 1px rgba(243,215,122,.25)}
+  .step h2{margin:0;font-size:18px;letter-spacing:.3px}
+  .step p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;letter-spacing:.4px}
+  input,select,textarea,button{font-family:var(--sans);font-size:15px}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;background:#0a0805;border:1px solid var(--line);color:var(--ink);
+    border-radius:11px;padding:11px 12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+  textarea{resize:vertical;min-height:70px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:160px}
+  .clips-ctrl{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .clips-num{font-family:var(--serif);font-style:italic;font-size:48px;color:var(--gold2);
+    min-width:74px;text-align:center;text-shadow:0 0 24px rgba(212,175,55,.4)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:8px;
+    background:linear-gradient(90deg,var(--gold-deep),var(--gold2));flex:1;min-width:180px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;
+    border-radius:50%;background:var(--gold2);border:3px solid #070707;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(212,175,55,.35)}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold2);
+    border:3px solid #070707;cursor:pointer}
+  .btn{cursor:pointer;border:none;border-radius:11px;padding:12px 18px;font-weight:700;
+    letter-spacing:.4px;transition:transform .08s ease,filter .15s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,var(--gold-deep));color:#0e0a02;font-size:16px}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--gold)}
+  .btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold-deep));color:#0e0a02}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+    border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;
+    background:transparent}
+  .pill[aria-selected=true]{border-color:var(--gold);color:#0e0a02;background:linear-gradient(135deg,var(--gold2),var(--gold));font-weight:700}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  .search-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .search-bar input{flex:1;min-width:200px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .idea{background:#0a0805;border:1px solid var(--line);border-radius:13px;padding:14px;
+    cursor:pointer;transition:border-color .15s,transform .1s}
+  .idea:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .idea.sel{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2)}
+  .idea .it{font-weight:700;font-size:15px;margin:0 0 6px}
+  .idea .ix{font-size:12.5px;color:var(--muted);margin:3px 0}
+  .idea .ix b{color:var(--gold2);font-weight:600}
+  .idea .idnum{float:right;font-size:11px;color:#6b5d35;font-family:var(--serif);font-style:italic}
+  .cast-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cast-row{background:#0a0805;border:1px solid var(--line);border-radius:11px;padding:11px}
+  .cast-row .slot{font-size:11px;color:var(--gold2);letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px}
+  .cast-row .ff{display:flex;gap:8px}
+  .cast-row .ff>div{flex:1}
+  @media(max-width:620px){.cast-grid{grid-template-columns:1fr}}
+  .lote-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .lote-head .lt{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--gold2)}
+  .lote-head .lt small{font-style:normal;font-family:var(--sans);font-size:12px;color:var(--muted);
+    display:block;letter-spacing:.4px}
+  .out{background:#050403;border:1px solid var(--line);border-radius:11px;padding:14px;
+    white-space:pre-wrap;word-break:break-word;font-size:13.5px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    color:#ece4d2;max-height:440px;overflow:auto;line-height:1.7}
+  .clip{background:#050403;border:1px solid var(--line);border-radius:11px;margin:10px 0;overflow:hidden}
+  .clip-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;
+    background:rgba(212,175,55,.07);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .clip-top .ct{font-weight:700;font-size:13px;letter-spacing:.3px;color:var(--gold2)}
+  .clip-top .right{display:flex;align-items:center;gap:8px}
+  .wc{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;letter-spacing:.5px}
+  .wc.ok{background:rgba(232,199,90,.16);color:var(--ok);border:1px solid rgba(232,199,90,.45)}
+  .wc.bad{background:rgba(192,57,43,.16);color:#e08a80;border:1px solid rgba(192,57,43,.5)}
+  .clip pre{margin:0;padding:13px;white-space:pre-wrap;word-break:break-word;font-size:13px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:#ece4d2;line-height:1.65}
+  .copy-ok{color:var(--gold2)!important}
+  .api-box{display:none}
+  .api-box.show{display:block}
+  .divider{height:1px;background:var(--line);margin:14px 0}
+  .footer{text-align:center;color:#6b5d35;font-size:12px;margin-top:30px;line-height:1.8}
+  .badge-feature{display:inline-block;font-size:11px;color:var(--gold2);border:1px solid rgba(212,175,55,.4);
+    border-radius:999px;padding:3px 9px;margin:2px}
+  .synopsis{border-left:3px solid var(--gold);padding:4px 0 4px 14px;margin:6px 0 0}
+  .synopsis .st{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--gold2)}
+  .synopsis .sx{font-size:13px;color:var(--muted);margin-top:4px}
+  .hidden{display:none}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .part-badge{display:inline-block;font-size:12px;color:#0e0a02;font-weight:700;border-radius:999px;
+    padding:4px 12px;margin-left:8px;background:linear-gradient(135deg,var(--gold2),var(--gold))}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="brand">
+    <div class="logo">JM BOTS FRUTAS</div>
+    <div class="tag">Fábrica de novelas de frutas · Veo 3</div>
+    <div><span class="ribbon" id="ideaCount">+5000 ideas offline</span></div>
+  </header>
+
+  <!-- PASO 1 -->
+  <section class="card">
+    <div class="step"><div class="num">1</div>
+      <div><h2>¿Cuántos clips quieres crear?</h2><p>Cada clip = 8s en Veo 3 · diálogo exacto de 19 palabras</p></div></div>
+    <div class="clips-ctrl">
+      <span class="clips-num" id="clipsNum">16</span>
+      <input type="range" id="clipsRange" min="12" max="25" value="16">
+      <input type="number" id="clipsInput" min="12" max="25" value="16" style="max-width:90px">
+    </div>
+    <div class="hint">Mínimo 12 · máximo 25 clips para armar el video completo.</div>
+    <div class="divider"></div>
+    <label>Motor de generación</label>
+    <div class="row" style="align-items:center;gap:8px">
+      <div style="flex:0 0 auto"><span class="pill" data-prov="offline" aria-selected="true" onclick="setProv('offline')">⚡ Offline (sin conexión)</span></div>
+      <div style="flex:0 0 auto"><span class="pill" data-prov="gemini" aria-selected="false" onclick="setProv('gemini')">✦ Gemini (API key)</span></div>
+      <div style="flex:0 0 auto"><span class="pill" data-prov="claude" aria-selected="false" onclick="setProv('claude')">✦ Claude (API key)</span></div>
+    </div>
+    <div class="api-box" id="apiBox" style="margin-top:14px">
+      <div class="row">
+        <div><label>API Key (<span id="provName">Gemini</span>) — no se guarda, solo en esta sesión</label>
+          <input type="password" id="apiKey" placeholder="pega tu API key aquí" autocomplete="off"></div>
+        <div style="flex:0 0 240px"><label>Modelo</label><select id="apiModel"></select></div>
+      </div>
+      <div class="hint">El modo offline funciona siempre. La API solo se usa si pegas una key válida; si falla, vuelve a offline.</div>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="card">
+    <div class="step"><div class="num">2</div>
+      <div><h2>Elige la historia</h2><p>Banco de +5000 ganchos virales · busca, filtra o pide una al azar</p></div></div>
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="Buscar (traición, ADN, herencia, gemela, embarazo, venganza...)">
+      <button class="btn btn-gold btn-sm" onclick="randomIdea()">🎲 Idea al azar</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleCustom()">✍️ Idea personalizada</button>
+    </div>
+    <div id="customBox" class="hidden" style="margin-bottom:14px">
+      <label>Tu premisa (la usará el motor para armar la trama)</label>
+      <textarea id="customPremise" placeholder="Ej: La empleada descubre que su patrona le robó la identidad hace años y planea su venganza el día de la boda."></textarea>
+    </div>
+    <div class="grid" id="ideaGrid"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn btn-ghost btn-sm" id="moreBtn" onclick="renderMore()">Ver más ideas ▾</button>
+    </div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="card">
+    <div class="step"><div class="num">3</div>
+      <div><h2>El reparto (hasta 6 personajes)</h2><p>Auto-asignado según la historia · editable · nombres propios = 1 palabra</p></div></div>
+    <div id="synopsis" class="synopsis hidden"></div>
+    <div class="cast-grid" id="castGrid" style="margin-top:14px"></div>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <label style="margin:0">Parte del video</label>
+      <select id="partSel" style="max-width:150px" onchange="S.part=+this.value">
+        <option value="1">Parte 1</option><option value="2">Parte 2</option>
+        <option value="3">Parte 3</option><option value="4">Parte 4</option><option value="5">Parte 5</option>
+      </select>
+      <span class="hint" style="margin:0">La Parte 2 en adelante continúa la historia desde el cliffhanger, con el mismo reparto.</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-primary" id="genBtn" onclick="generate()">🍯 Generar los 3 lotes</button>
+      <button class="btn btn-ghost btn-sm" onclick="reroll()">↻ Otro reparto</button>
+    </div>
+    <div class="hint">Lote 1 = personajes (1 por línea) · Lote 2 = escenas lineales · Lote 3 = animación lineal + guion (19 palabras/clip, 3–4 personajes).</div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="results" class="hidden">
+    <div class="card">
+      <div class="lote-head"><div class="lt">LOTE 1 · Personajes<small>Un personaje por línea · pega cada línea en Veo 3 / Flow</small></div>
+        <button class="btn btn-gold btn-sm" onclick="copyEl('out1',this)">Copiar Lote 1</button></div>
+      <div class="out" id="out1"></div>
+    </div>
+    <div class="card">
+      <div class="lote-head"><div class="lt">LOTE 2 · Escenas<small>Un prompt por línea · con los nombres del reparto</small></div>
+        <button class="btn btn-gold btn-sm" onclick="copyEl('out2',this)">Copiar Lote 2</button></div>
+      <div class="out" id="out2"></div>
+    </div>
+    <div class="card">
+      <div class="lote-head"><div class="lt">LOTE 3 · Animación + Guion<small>Un solo lote · un prompt por línea (separados por enter) · 19 palabras exactas por clip</small></div>
+        <div class="right" style="display:flex;align-items:center;gap:8px">
+          <span class="wc" id="out3check"></span>
+          <button class="btn btn-gold btn-sm" onclick="copyEl('out3',this)">Copiar Lote 3</button>
+        </div></div>
+      <div class="out" id="out3"></div>
+    </div>
+    <div style="text-align:center;margin:8px 0 4px">
+      <button class="btn btn-primary" onclick="nextPart()">▶ Generar Parte siguiente (continúa la historia)</button>
+      <div class="hint">Mantiene el mismo reparto y retoma desde el cliffhanger.</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span class="badge-feature">⚡ Offline</span>
+    <span class="badge-feature">19 palabras/clip</span>
+    <span class="badge-feature">3–4 personajes</span>
+    <span class="badge-feature">Veo 3 · 8s</span>
+    <span class="badge-feature">Gemini / Claude</span>
+    <br>JM BOTS FRUTAS — generador de novelas de frutas. Guarda este archivo y úsalo sin internet.
+  </div>
+</div>
+
+<script>
+/* =================== STATE =================== */
+const S = { clips:16, prov:'offline', part:1, ideas:[], shown:0, page:24, selected:null, cast:null, filtered:null, lastBeat:null, partSeed:0 };
+const SLOTS=['A','B','C','D','E','F'];
+
+/* =================== FRUITS =================== */
+const FRUITS = [
+ {n:"Pitaya",en:"pink dragon fruit",head:"pink dragon fruit with vibrant green leaf spikes and tiny seed speckles",small:false},
+ {n:"Coco",en:"coconut",head:"brown coconut shell with fibrous husk texture",small:false},
+ {n:"Fresa",en:"strawberry",head:"red strawberry with tiny yellow seeds and a green leafy crown",small:true},
+ {n:"Uva",en:"grape",head:"deep purple grape with glossy smooth skin",small:true},
+ {n:"Sandía",en:"watermelon",head:"green striped watermelon rind",small:false},
+ {n:"Plátano",en:"banana",head:"yellow banana peel with small brown spots",small:false},
+ {n:"Piña",en:"pineapple",head:"golden pineapple with diamond-pattern skin and a spiky green crown",small:false},
+ {n:"Naranja",en:"orange",head:"bright orange citrus peel with dimpled texture",small:false},
+ {n:"Manzana",en:"apple",head:"glossy red apple skin with a small green leaf and stem",small:false},
+ {n:"Durazno",en:"peach",head:"fuzzy peach skin in soft orange-pink tones",small:false},
+ {n:"Pera",en:"pear",head:"green pear skin with smooth gradient texture",small:false},
+ {n:"Kiwi",en:"kiwi",head:"fuzzy brown kiwi skin with bright green seeded hints",small:true},
+ {n:"Limón",en:"lime",head:"bright green lime peel with glossy dimpled texture",small:true},
+ {n:"Mango",en:"mango",head:"red-orange-yellow mango skin with smooth gradient",small:false},
+ {n:"Cereza",en:"cherry",head:"glossy deep red cherry skin with a thin stem",small:true},
+ {n:"Mora",en:"blackberry",head:"dark purple blackberry of glossy clustered druplets",small:true},
+ {n:"Granada",en:"pomegranate",head:"ruby-red pomegranate skin with a crown-shaped calyx",small:false},
+ {n:"Higo",en:"fig",head:"purple fig skin with soft matte texture",small:true},
+ {n:"Maracuyá",en:"passion fruit",head:"wrinkled purple passion fruit skin",small:true},
+ {n:"Guayaba",en:"guava",head:"pale green guava skin with soft pink interior hints",small:false},
+];
+
+/* =================== ROLES (6 slots) =================== */
+const SLOT = {
+ A:{noun:"businesswoman",hair:"long dark brown wavy hair flowing behind the fruit head",
+    outfit:"elegant light beige tailored suit, white blouse, silver necklace with three tiny stars",
+    expr:"elegant, kind and quietly determined expression",
+    voz:{tom:"medio-agudo",emocao:"determinada",estilo:"firme con dolor contenido"}},
+ B:{noun:"businessman",hair:"short slicked-back black hair",
+    outfit:"luxury black tailored Italian business suit, white shirt, dark gold tie, expensive watch",
+    expr:"arrogant, dominant and resentful expression",
+    voz:{tom:"grave",emocao:"furioso",estilo:"amenazante"}},
+ C:{noun:"little girl",hair:"long braided hair",
+    outfit:"pink cardigan, white dress, small white sneakers",
+    expr:"sweet, innocent and emotional expression",
+    voz:{tom:"agudo",emocao:"asustada",estilo:"voz infantil"}},
+ D:{noun:"lawyer",hair:"hair in a tight neat bun",
+    outfit:"sharp navy lawyer suit, thin glasses, a leather folder in hand",
+    expr:"serious, sharp and confident expression",
+    voz:{tom:"medio",emocao:"serio",estilo:"declarativo"}},
+ E:{noun:"young man (loyal ally)",hair:"slightly wavy dark hair",
+    outfit:"smart casual navy blazer over an open-collar white shirt",
+    expr:"warm, loyal and worried expression",
+    voz:{tom:"medio",emocao:"preocupado",estilo:"sincero"}},
+ F:{noun:"elder matriarch",hair:"silver hair in an elegant updo",
+    outfit:"refined dark green gown with a pearl necklace",
+    expr:"stern, proud and commanding expression",
+    voz:{tom:"grave-medio",emocao:"severa",estilo:"autoritario"}},
+};
+const SLOT_ES={A:"PROTAGONISTA",B:"VILLANO",C:"NIÑA",D:"ABOGADA / TERCERO",E:"AMANTE / ALIADO",F:"MATRIARCA / SUEGRA"};
+
+/* =================== DIÁLOGOS (19 palabras exactas, 3-4 personajes) =================== */
+const DLG = {
+ presentacion:[
+  [["A","Hoy presentamos a la familia un anuncio que lo cambiará todo."],["F","Espero que sea algo digno."],["B","Yo lo dudo."]],
+  [["A","{B}, nuestra hija merece crecer en una casa llena de amor verdadero."],["B","El amor no paga."],["C","Papá, no peleen."]],
+ ],
+ gancho:[
+  [["A","Encontré estos papeles escondidos y exijo que alguien me explique qué significan."],["B","No te metas."],["E","{A}, déjame ayudarte ahora."]],
+  [["A","{B}, hallé una prueba de embarazo que tú juraste jamás sería posible."],["B","Puedo explicarlo."],["F","Más te vale explicarlo, hijo."]],
+ ],
+ sospecha:[
+  [["B","{A} esconde algo grave y hoy mismo pienso descubrir toda la verdad."],["A","No escondo nada."],["D","Cálmense los dos, ahora."]],
+ ],
+ descubrimiento:[
+  [["D","Los exámenes confirman lo imposible: esta niña jamás fue hija biológica suya."],["A","Eso es imposible."],["F","Lo sabía desde siempre."]],
+ ],
+ tension:[
+  [["B","Tú nunca perteneciste a esta familia y hoy voy a borrarte completamente."],["A","Inténtalo si puedes."],["E","Yo siempre la defiendo."]],
+ ],
+ acusacion:[
+  [["A","Durante años callé, pero hoy todos sabrán lo que tú realmente hiciste."],["B","No te atrevas."],["C","Mamá, diles la verdad."]],
+ ],
+ revelacion:[
+  [["D","Apareció un segundo testamento y según él tú jamás fuiste heredera legítima."],["A","No puede ser."],["B","Es falso."],["F","Yo firmé."]],
+  [["D","Tengo pruebas: esta mujer robó tu nombre, tu herencia y tu vida."],["A","Demuéstralo ahora."],["E","Yo la apoyo."],["B","Mienten todos."]],
+ ],
+ traicion:[
+  [["B","Llevo meses fingiendo amor mientras planeaba quitarte absolutamente todo lo que amas."],["A","Eres un monstruo."],["E","Yo siempre te creí."]],
+ ],
+ confrontacion:[
+  [["A","Hoy se acaba tu reinado y toda la familia conocerá tu verdad."],["B","Cállate ya."],["F","Habla, hija."],["C","Sí, mami, habla."]],
+ ],
+ suplica:[
+  [["A","Por favor no hagas esto frente a la niña, ella es inocente."],["B","Debiste pensarlo antes."],["C","Papá, no, por favor."]],
+ ],
+ amenaza:[
+  [["B","Esto apenas comienza y pronto entenderás que jamás debiste meterte conmigo, querida."],["A","No te temo."],["E","Yo estoy contigo siempre."]],
+ ],
+ cliffhanger:[
+  [["C","Mamá, alguien llega y dice traer noticias que cambiarán nuestra vida entera."],["A","No abras todavía."],["D","Ya es demasiado tarde."]],
+  [["D","La prueba de paternidad llegó y su resultado destruirá a esta familia."],["A","Léelo ahora mismo."],["B","Espera."],["F","No, dámelo ya."]],
+ ],
+};
+const BEAT_ES={presentacion:"PRESENTACIÓN",gancho:"EL DESCUBRIMIENTO",sospecha:"LA SOSPECHA",descubrimiento:"LA PISTA",
+ tension:"TENSIÓN",acusacion:"LA ACUSACIÓN",revelacion:"LA REVELACIÓN",traicion:"LA TRAICIÓN",
+ confrontacion:"LA CONFRONTACIÓN",suplica:"LA SÚPLICA",amenaza:"LA AMENAZA",cliffhanger:"CLIFFHANGER"};
+
+/* =================== ACCIÓN / CÁMARA / LUZ / LUGAR =================== */
+const ACTION={
+ presentacion:"{A} and {B} face each other while {F} watches with cold disapproval.",
+ gancho:"{A} confronts {B} with new evidence while {E} steps in to protect her.",
+ sospecha:"{B} circles {A} with suspicion as {D} quietly observes the tense exchange.",
+ descubrimiento:"{D} presents shocking proof while {A} reels and {F} reacts with alarm.",
+ tension:"{B} threatens {A} face to face as {E} moves between them protectively.",
+ acusacion:"{A} accuses {B} loudly while {C} clings to her, frightened by the shouting.",
+ revelacion:"{D} exposes a devastating secret as {A}, {B} and {F} freeze in shock.",
+ traicion:"{B} coldly confesses his betrayal while {A} breaks down and {E} looks horrified.",
+ confrontacion:"{A} stands up to {B} as {F} and {C} watch the truth explode open.",
+ suplica:"{A} pleads desperately while {C} cries and {B} stays cold and unmoved.",
+ amenaza:"{B} delivers a chilling threat to {A} while {E} swears to protect her.",
+ cliffhanger:"{C} bursts in with shocking news as {A}, {D} and {F} turn in alarm.",
+};
+const LOCATIONS=[
+ "Luxury modern mansion living room, floor-to-ceiling windows",
+ "Corporate conference room after a meeting, glass walls",
+ "Hospital corridor with cold white light",
+ "Elegant courtroom, wood panels and tall windows",
+ "Lush mansion garden at sunset",
+ "Rainy city street at night, neon reflections",
+ "Luxury marble kitchen, warm pendant lights",
+ "Grand staircase of a mansion foyer",
+ "Private office at night, city lights behind the glass",
+ "Candle-lit church interior, stained glass",
+ "Opulent dining room, long table set for dinner",
+ "Penthouse balcony overlooking the city at dusk",
+];
+const CAMERAS=[
+ "Medium-wide shot, slow push-in",
+ "Close-up on {A}'s emotional reaction",
+ "Over-the-shoulder of {B}, ending on {A}",
+ "Slow dolly-in ending on a furious face",
+ "Two-shot, slight low angle for drama",
+ "Handheld medium shot, subtle shake",
+];
+const LIGHTING=[
+ "Warm afternoon sunlight with dramatic shadows",
+ "Cold corporate lighting with hard shadows",
+ "Stormy blue light through the windows",
+ "Golden hour glow, soft rim light",
+ "Harsh overhead light, tense mood",
+ "Moody low-key lighting, single warm source",
+];
+const AVOID="human face, human head, human skin, human facial features, deformed anatomy, inconsistent character design, text overlays, subtitles, watermarks, logos, extra fingers, deformed hands, music";
+/* ESTILO ESTRICTO (extraído del prompt de referencia) — se aplica a TODOS los lotes */
+const STYLE_SUFFIX="ultra-realistic textures, high-end rendering, Unreal Engine 5, 8K, physically based rendering, high fashion editorial style";
+const STYLE_SCENE="photorealistic organic anthropomorphic fruit characters, cinematic photorealism, deep glossy skin with micro-displacement bumps, "+STYLE_SUFFIX+", fruit heads fully visible, no human faces";
+const VIEWS="front full body view, side profile full body view, back full body view, face close-up front view, face close-up side profile";
+
+/* =================== ARQUETIPOS =================== */
+const ARCH=[
+ {e:"🍓",t:"El bebé no es de {B}",g:"{A} encuentra una prueba de embarazo escondida",x:"el público cree que hubo traición, pero {B} era infértil",c:"¿Quién mintió sobre la infertilidad?"},
+ {e:"🍉",t:"{A} pasó de rica a pobre",g:"{A} es expulsada de su propia mansión",x:"{B} falsificó los documentos de propiedad",c:"¿Quién es el verdadero heredero?"},
+ {e:"🍍",t:"La boda era una trampa",g:"{B} llega al altar y ve a {A} besando a otro",x:"el beso fue armado para impedir la boda",c:"¿Quién lo organizó todo?"},
+ {e:"🍊",t:"El hijo secreto de {A}",g:"una niña llama mamá a {A}",x:"{A} jura que nunca tuvo hijos",c:"¿Las fotos de {C} son reales?"},
+ {e:"⚰️",t:"El entierro de {A} estando viva",g:"{A} ve su propio entierro",x:"alguien le robó la identidad",c:"¿Cómo lo logró {B}?"},
+ {e:"🧬",t:"El ADN cambiado en el hospital",g:"{A} descubre que no es hija de sus padres",x:"cuatro bebés fueron intercambiados",c:"¿Quién es la verdadera madre?"},
+ {e:"🥝",t:"La venganza de la empleada {A}",g:"{A} derrama vino sobre {B} en la fiesta",x:"años atrás {B} le robó la identidad",c:"¿Revelará todo frente a todos?"},
+ {e:"🍑",t:"La gemela que nunca existió",g:"{B} encuentra a alguien idéntica a {A}",x:"la familia jura que {A} no tiene hermana",c:"¿Quién borró el pasado?"},
+ {e:"📱",t:"El secreto del celular roto",g:"{A} encuentra un celular destruido",x:"contiene videos que comprometen a media ciudad",c:"¿Quién esconde al dueño?"},
+ {e:"💍",t:"El segundo testamento",g:"leen el testamento de un millonario",x:"aparece un segundo testamento escondido",c:"¿{A} o {B} se quedan con todo?"},
+ {e:"👶",t:"No quiero más hijas",g:"{B} amenaza con echar a {A} si nace otra niña",x:"{B} esconde por qué desprecia a las niñas",c:"¿Qué oculta {B} sobre su pasado?"},
+ {e:"💉",t:"La enfermera {A} sabía la verdad",g:"{A} reconoce a {B} de hace veinte años",x:"{B} mandó a {A} a una clínica para callarla",c:"¿Hablará {A} por fin?"},
+ {e:"🔥",t:"El incendio que lo ocultó todo",g:"un incendio destruye la mansión de {B}",x:"el fuego escondía un cadáver y un fraude",c:"¿Quién provocó el incendio?"},
+ {e:"📸",t:"La foto que destruyó la boda",g:"llega una foto comprometedora a la boda de {B}",x:"la foto fue trucada por {F}",c:"¿Por qué quería impedir la boda?"},
+ {e:"🤰",t:"Embarazo de quince años atrás",g:"{C} aparece buscando a su verdadero padre",x:"el padre es {B}, casado con {A}",c:"¿{A} ya lo sabía?"},
+ {e:"💔",t:"El amante que era espía",g:"{A} se enamora de {E} sin saber quién es",x:"{E} fue contratado para arruinarla",c:"¿{E} se enamoró de verdad?"},
+ {e:"🏦",t:"La cuenta secreta",g:"{A} descubre millones en una cuenta a su nombre",x:"{B} la usó para lavar dinero",c:"¿La culparán a ella?"},
+ {e:"👰",t:"La novia equivocada",g:"{B} se casa creyendo que es {A}",x:"era la gemela suplantándola",c:"¿Dónde está la verdadera {A}?"},
+ {e:"🩸",t:"La herencia maldita",g:"{A} hereda una fortuna inesperada",x:"con la condición de vivir con su enemigo {B}",c:"¿Aceptará el trato?"},
+ {e:"📞",t:"La llamada del muerto",g:"{A} recibe una llamada de un familiar enterrado",x:"el muerto está vivo y sabe el secreto",c:"¿Quién lo escondió tantos años?"},
+ {e:"🍇",t:"El veneno en la copa",g:"{B} se desploma en la cena familiar",x:"el veneno estaba destinado a {A}",c:"¿Quién quería matarla?"},
+ {e:"🎭",t:"La identidad robada",g:"{A} descubre a alguien usando su nombre y vida",x:"{B} lleva años fingiendo ser ella",c:"¿Cómo recuperará su vida?"},
+ {e:"🧒",t:"El niño que no envejece",g:"un niño dice ser hijo de {A} de hace décadas",x:"existe una certidão escondida que lo prueba",c:"¿Quién falsificó las fechas?"},
+ {e:"💼",t:"El despido que era venganza",g:"{B} humilla y despide a {A} ante todos",x:"{A} era la dueña secreta de la empresa",c:"¿Cuándo lo revelará?"},
+ {e:"🌹",t:"La carta que llegó tarde",g:"{A} recibe una carta de hace veinte años",x:"revela que {B} la traicionó desde el inicio",c:"¿Es demasiado tarde para vengarse?"},
+ {e:"🏥",t:"El diagnóstico falso",g:"a {A} le dicen que está enferma",x:"{B} sobornó al médico para encerrarla",c:"¿Logrará escapar a tiempo?"},
+ {e:"👑",t:"La reina destronada",g:"{A} pierde el control de su imperio",x:"{B} compró en secreto todas sus acciones",c:"¿Le queda una última jugada?"},
+ {e:"🕯️",t:"El funeral interrumpido",g:"alguien interrumpe el funeral gritando la verdad",x:"el difunto fingió su muerte para huir",c:"¿De qué huía exactamente?"},
+ {e:"🗝️",t:"La habitación cerrada",g:"{A} abre una habitación prohibida de la mansión",x:"adentro están las pruebas del crimen de {B}",c:"¿La descubrirán husmeando?"},
+ {e:"💸",t:"La deuda impagable",g:"{B} exige a {A} pagar una deuda imposible",x:"la deuda fue inventada con papeles falsos",c:"¿Quién falsificó las firmas?"},
+];
+
+/* =================== PRNG =================== */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function pick(rng,arr){return arr[Math.floor(rng()*arr.length)];}
+function fill(str,names){return str.replace(/\{([A-F])\}/g,(m,k)=>names[k]||m);}
+function wc(text){return (text.replace(/[.,;:¿?¡!"]/g,' ').split(/\s+/).filter(Boolean)).length;}
+
+/* =================== BUILD IDEAS =================== */
+function castFruits(rng){
+  const pool=[...FRUITS];
+  const take=l=>l.splice(Math.floor(rng()*l.length),1)[0];
+  const A=take(pool),B=take(pool);
+  const sp=pool.filter(f=>f.small); const C=take(sp.length?sp:pool);
+  const ci=pool.indexOf(C); if(ci>=0)pool.splice(ci,1);
+  const D=take(pool),E=take(pool),F=take(pool);
+  return {A,B,C,D,E,F};
+}
+function buildIdeas(){
+  const out=[],total=5200;
+  for(let i=0;i<total;i++){
+    const rng=mulberry32(i*2654435761+99);
+    const arch=ARCH[i%ARCH.length];
+    const fr=castFruits(rng);
+    const names={}; SLOTS.forEach(s=>names[s]=fr[s].n);
+    out.push({id:i+1,arch,fruits:fr,names,
+      title:fill(arch.t,names),g:fill(arch.g,names),x:fill(arch.x,names),c:fill(arch.c,names),
+      search:(arch.t+" "+arch.g+" "+arch.x+" "+arch.c).toLowerCase()});
+  }
+  return out;
+}
+
+/* =================== ARC (progresivo por parte) =================== */
+function buildArc(n,part){
+  part=part||1;
+  // cada parte arranca con un estado emocional más avanzado de la trama
+  const starts={
+    1:['presentacion','gancho'],
+    2:['sospecha','descubrimiento'],
+    3:['acusacion','revelacion'],
+    4:['traicion','confrontacion'],
+    5:['amenaza','revelacion']
+  };
+  const start = starts[part] || ['tension','acusacion'];
+  const end = part>=5 ? ['confrontacion','cliffhanger'] : ['amenaza','cliffhanger'];
+  const mid=['sospecha','descubrimiento','tension','acusacion','revelacion','traicion','confrontacion','suplica'];
+  const need=n-4;
+  const arc=[...start];
+  // offset grande por parte para que el centro NO se repita entre partes
+  const off=(part-1)*5;
+  for(let i=0;i<need;i++) arc.push(mid[(i+off)%mid.length]);
+  return arc.concat(end);
+}
+
+/* =================== CHARACTER PROMPTS =================== */
+function composeFull(slot,fr,name){const m=SLOT[slot];
+  return `${name}, character reference sheet, anthropomorphic ${fr.en} ${m.noun}, the entire head is a photorealistic organic ${fr.en}: ${fr.head}, deep glossy skin with micro-displacement bumps, large expressive eyes integrated into the fruit surface, ${m.hair}, wearing ${m.outfit}, ${m.expr}, ${VIEWS}, clean organized grid layout, multiple views on a clean white background, consistent character design, fruit head fully visible in every view, no human face, no human skin on the head, ${STYLE_SUFFIX}.`;}
+function composeShort(slot,fr,name){const m=SLOT[slot];
+  return `${name} (anthropomorphic ${fr.en} ${m.noun}, photorealistic organic ${fr.head}, deep glossy skin with micro-displacement bumps, fruit head fully visible, no human face)`;}
+
+/* =================== GENERATE OFFLINE =================== */
+function genOffline(cast,n,part){
+  part=part||1;
+  const arc=buildArc(n,part);
+  const names={}; SLOTS.forEach(s=>names[s]=cast[s].name);
+  // semilla muy separada por parte → escenas/cámaras/luz realmente distintas
+  const rng=mulberry32((S.selected?S.selected.id:7)*100003 + n*31 + part*1000003);
+  const used=new Set();
+  const lote2=[],lote3=[];
+  let last=null;
+  const tagP=`Parte ${part}`;
+  // nota de continuidad para Parte 2 en adelante
+  const contNota = part>1
+    ? ` Retoma directamente desde el cliffhanger de la Parte ${part-1}, sin presentar de nuevo a los personajes; la tensión escala respecto a la parte anterior.`
+    : "";
+
+  arc.forEach((beat,idx)=>{
+    const num=idx+1;
+    const loc=pick(rng,LOCATIONS);
+    const cam=fill(pick(rng,CAMERAS),names);
+    const lig=pick(rng,LIGHTING);
+    const actRaw=ACTION[beat];
+    const act=fill(actRaw,names);
+    // dialogue
+    const opts=DLG[beat]||DLG.tension;
+    let tpl=pick(rng,opts);
+    if(opts.length>1&&JSON.stringify(tpl)===last)tpl=pick(rng,opts);
+    last=JSON.stringify(tpl);
+    // present slots = dialogue speakers ∪ action slots
+    const present=new Set();
+    (actRaw.match(/\{([A-F])\}/g)||[]).forEach(m=>present.add(m[1]));
+    tpl.forEach(([s])=>present.add(s));
+    const presentList=SLOTS.filter(s=>present.has(s));
+    presentList.forEach(s=>used.add(s));
+    // dialogue strings
+    const dialogueAttr=tpl.map(([s,line])=>`${names[s]}: "${fill(line,names)}"`).join("; ");
+    const dialoguePlain=tpl.map(([s,line])=>fill(line,names)).join(" ");
+    const voices=presentList.filter(s=>tpl.some(([sp])=>sp===s))
+      .map(s=>`${names[s]}=${SLOT[s].voz.emocao}/${SLOT[s].voz.tom}`).join(", ");
+    const namesTag=presentList.map(s=>`${names[s]} (${cast[s].fruit.en})`).join(", ");
+    const shortDesc=presentList.map(s=>composeShort(s,cast[s].fruit,names[s])).join("; ");
+    // LOTE 2 (single line, strict style) — nota de continuidad solo en la primera escena
+    lote2.push(`${tagP} · Escena ${num} — ${BEAT_ES[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${namesTag} | Acción: ${act} | Cámara: ${cam} | Luz: ${lig}${idx===0?" | Continuidad:"+contNota:""}`);
+    // LOTE 3 (single line + guion, strict style) — nota de continuidad solo en el primer clip
+    const prompt=`${tagP} · Clip ${num} — ${BEAT_ES[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${shortDesc} | Acción: ${act} | Guion: ${dialogueAttr} | Cámara: ${cam} | Luz: ${lig} | Duración: 8s | Voces: ${voices} | Avoid: ${AVOID} | Reglas: cabezas de fruta siempre visibles, sin rostros humanos, diálogo en español.${idx===0?contNota:""}`;
+    lote3.push({prompt,dialogue:dialoguePlain});
+  });
+
+  const lote1=SLOTS.filter(s=>used.has(s)).map(s=>composeFull(s,cast[s].fruit,cast[s].name));
+  return {lote1,lote2,lote3};
+}
+
+/* =================== API =================== */
+function buildApiPrompt(cast,n,part){
+  part=part||1;
+  const reparto=SLOTS.map(s=>`${cast[s].name} (${SLOT_ES[s]}, ${cast[s].fruit.en})`).join(", ");
+  const premise=S.selected?`${S.selected.title}. Gancho: ${S.selected.g}. Giro: ${S.selected.x}. Cliffhanger: ${S.selected.c}.`:(document.getElementById('customPremise').value||"Una novela dramática de frutas con traición y un cliffhanger.");
+  const cont = part>1 ? `Esta es la PARTE ${part}: continúa la historia justo desde el cliffhanger de la parte anterior, con el MISMO reparto, sin repetir la presentación. La tensión debe escalar respecto a la parte anterior.` : `Esta es la PARTE 1.`;
+  return `Eres un guionista de novelas virales de TikTok con personajes que son frutas antropomórficas, para animar en Veo 3 (clips de 8 segundos).
+
+REPARTO (nombres propios, cada uno de 1 sola palabra): ${reparto}
+PREMISA: ${premise}
+${cont}
+NÚMERO DE CLIPS: ${n}
+
+ESTILO VISUAL OBLIGATORIO en TODOS los prompts: ${STYLE_SCENE}.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON válido (sin texto extra, sin markdown, sin backticks):
+{
+ "lote1": ["Nombre, character reference sheet, anthropomorphic <fruit> <rol>, photorealistic organic <fruta> skin with micro-displacement bumps, wearing ..., ${VIEWS}, clean organized grid layout, multiple views on a clean white background, consistent character design, fruit head fully visible, no human face, ${STYLE_SUFFIX}.", ... una hoja de referencia por personaje, en INGLÉS, UNA sola línea ...],
+ "lote2": ["Parte ${part} · Escena 1 — TÍTULO | Estilo: ${STYLE_SCENE} | Lugar: ... | Personajes: nombres | Acción: ... en inglés | Cámara: ... | Luz: ...", ... una sola línea por escena ...],
+ "lote3": [ {"prompt":"Parte ${part} · Clip 1 — TÍTULO | Estilo: ${STYLE_SCENE} | Lugar: ... | Personajes: ... | Acción: ... en inglés | Guion: Nombre: \\"...\\"; Nombre: \\"...\\" | Cámara: ... | Luz: ... | Duración: 8s | Voces: ... | Avoid: ${AVOID}", "dialogue":"solo las palabras habladas de TODOS los personajes juntas"}, ... ]
+}
+
+REGLAS ESTRICTAS:
+- "lote2" y "lote3" deben tener exactamente ${n} elementos.
+- Cada elemento es UNA SOLA LÍNEA de texto (sin saltos de línea internos).
+- "lote1" en formato HOJA DE REFERENCIA con TODOS los ángulos (${VIEWS}) para garantizar consistencia del personaje.
+- TODOS los prompts deben incluir el estilo fotorrealista obligatorio indicado arriba.
+- En CADA clip deben hablar 3 o 4 personajes distintos (indica quién dice cada cosa con su nombre propio).
+- La suma de palabras del campo "dialogue" de cada clip debe ser EXACTAMENTE 19 palabras. Cuéntalas.
+- Diálogos (Guion / dialogue) en español; descripciones visuales en inglés.
+- Misma fruta por personaje, cabeza de fruta siempre visible (fotorrealista), nunca rostro humano.
+- Arco: ${part>1?'continuación desde el cliffhanger de la parte anterior, escalada, revelación, confrontación, amenaza y nuevo cliffhanger final.':'presentación, gancho, escalada, revelación, confrontación, amenaza y cliffhanger final.'}`;
+}
+async function callGemini(prompt,key,model){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:8192}})});
+  if(!r.ok)throw new Error('Gemini HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const d=await r.json();
+  return (d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+}
+async function callClaude(prompt,key,model){
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:model,max_tokens:8192,messages:[{role:'user',content:prompt}]})});
+  if(!r.ok)throw new Error('Claude HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const d=await r.json();
+  return (d.content||[]).map(b=>b.text||"").join("");
+}
+function parseApi(text){
+  let t=text.replace(/```json/gi,'').replace(/```/g,'').trim();
+  const a=t.indexOf('{'),b=t.lastIndexOf('}');
+  if(a>=0&&b>a)t=t.slice(a,b+1);
+  const o=JSON.parse(t);
+  // normalize lote3 to {prompt,dialogue}
+  o.lote3=(o.lote3||[]).map(it=>typeof it==='string'?{prompt:it,dialogue:''}:it);
+  return o;
+}
+
+/* =================== RENDER =================== */
+function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function renderResults(data){
+  document.getElementById('out1').textContent=(Array.isArray(data.lote1)?data.lote1.join("\n"):data.lote1);
+  document.getElementById('out2').textContent=(Array.isArray(data.lote2)?data.lote2.join("\n"):data.lote2);
+  const items=data.lote3||[];
+  // single block: one prompt per line, separated by enter
+  document.getElementById('out3').textContent=items.map(it=>it.prompt).join("\n");
+  // verification summary (does not break the single-block layout)
+  const counts=items.map(it=>it.dialogue?wc(it.dialogue):null).filter(c=>c!==null);
+  const chk=document.getElementById('out3check');
+  if(counts.length){
+    const okN=counts.filter(c=>c===19).length;
+    const allOk=okN===counts.length;
+    chk.className='wc '+(allOk?'ok':'bad');
+    chk.textContent=`${okN}/${counts.length} clips · 19 palabras${allOk?' ✓':' ✗'}`;
+  }else{chk.className='wc';chk.textContent='';}
+  // mostrar qué parte se generó en los encabezados
+  document.querySelectorAll('.lote-head .lt .part-badge').forEach(el=>el.remove());
+  document.querySelectorAll('.lote-head .lt').forEach(lt=>{
+    const b=document.createElement('span');b.className='part-badge';b.textContent='Parte '+(S.part||1);
+    lt.appendChild(b);
+  });
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* =================== MAIN =================== */
+async function generate(){
+  readCast();
+  const n=S.clips,part=S.part||1,btn=document.getElementById('genBtn');
+  if(S.prov==='offline'){renderResults(genOffline(S.cast,n,part));return;}
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('apiModel').value;
+  if(!key){alert('Pega tu API key o cambia a modo Offline.');return;}
+  btn.textContent='⏳ Generando con '+(S.prov==='gemini'?'Gemini':'Claude')+'...';btn.disabled=true;
+  try{
+    const prompt=buildApiPrompt(S.cast,n,part);
+    const text=S.prov==='gemini'?await callGemini(prompt,key,model):await callClaude(prompt,key,model);
+    renderResults(parseApi(text));
+  }catch(err){
+    alert('Falló la API ('+err.message+').\nGenerando en modo Offline como respaldo.');
+    renderResults(genOffline(S.cast,n,part));
+  }finally{btn.textContent='🍯 Generar los 3 lotes';btn.disabled=false;}
+}
+function nextPart(){
+  if((S.part||1)>=5){alert('Llegaste a la Parte 5 (máximo).');return;}
+  S.part=(S.part||1)+1;
+  const sel=document.getElementById('partSel');if(sel)sel.value=S.part;
+  generate();
+}
+
+/* =================== CAST PANEL =================== */
+function buildCastFromIdea(idea){const c={};SLOTS.forEach(s=>c[s]={name:idea.names[s],fruit:idea.fruits[s]});return c;}
+function renderCast(cast){
+  S.cast=cast;const g=document.getElementById('castGrid');g.innerHTML='';
+  SLOTS.forEach(s=>{
+    const opts=FRUITS.map(f=>`<option value="${f.n}" ${f.n===cast[s].fruit.n?'selected':''}>${f.n}</option>`).join('');
+    const row=document.createElement('div');row.className='cast-row';
+    row.innerHTML=`<div class="slot">${SLOT_ES[s]}</div>
+      <div class="ff"><div><label>Nombre (1 palabra)</label><input type="text" value="${cast[s].name}" data-name="${s}"></div>
+      <div><label>Fruta</label><select data-fruit="${s}">${opts}</select></div></div>`;
+    g.appendChild(row);
+  });
+}
+function readCast(){if(!S.cast)return;SLOTS.forEach(s=>{
+  const nm=document.querySelector(`[data-name="${s}"]`),fr=document.querySelector(`[data-fruit="${s}"]`);
+  if(nm)S.cast[s].name=(nm.value.trim().split(/\s+/)[0])||S.cast[s].name;
+  if(fr)S.cast[s].fruit=FRUITS.find(f=>f.n===fr.value)||S.cast[s].fruit;});}
+function reroll(){const fr=castFruits(mulberry32(Date.now()));const c={};SLOTS.forEach(s=>c[s]={name:fr[s].n,fruit:fr[s]});renderCast(c);}
+
+/* =================== IDEAS UI =================== */
+function renderIdeas(reset){
+  const grid=document.getElementById('ideaGrid');
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  let list=q?S.ideas.filter(i=>i.search.includes(q)):S.ideas;
+  if(reset){grid.innerHTML='';S.shown=0;S.filtered=list;}
+  list=S.filtered||list;
+  const end=Math.min(S.shown+S.page,list.length);
+  for(let i=S.shown;i<end;i++){const idea=list[i];
+    const div=document.createElement('div');
+    div.className='idea'+(S.selected&&S.selected.id===idea.id?' sel':'');
+    div.innerHTML=`<span class="idnum">#${idea.id}</span>
+      <p class="it">${idea.arch.e} ${idea.title}</p>
+      <p class="ix"><b>Gancho:</b> ${idea.g}</p>
+      <p class="ix"><b>Giro:</b> ${idea.x}</p>
+      <p class="ix"><b>Cliffhanger:</b> ${idea.c}</p>`;
+    div.addEventListener('click',()=>selectIdea(idea));
+    grid.appendChild(div);}
+  S.shown=end;
+  document.getElementById('moreBtn').style.display=S.shown<list.length?'inline-block':'none';
+}
+function renderMore(){renderIdeas(false);}
+function selectIdea(idea){
+  S.selected=idea;S.part=1;
+  const ps=document.getElementById('partSel');if(ps)ps.value=1;
+  document.getElementById('customBox').classList.add('hidden');
+  const sy=document.getElementById('synopsis');sy.classList.remove('hidden');
+  sy.innerHTML=`<div class="st">${idea.arch.e} ${idea.title}</div>
+    <div class="sx"><b style="color:var(--gold2)">Gancho:</b> ${idea.g} · <b style="color:var(--gold2)">Giro:</b> ${idea.x} · <b style="color:var(--gold2)">Cliffhanger:</b> ${idea.c}</div>`;
+  renderCast(buildCastFromIdea(idea));
+  renderIdeas(true);
+  document.getElementById('castGrid').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function randomIdea(){selectIdea(S.ideas[Math.floor(Math.random()*S.ideas.length)]);}
+function toggleCustom(){const box=document.getElementById('customBox');box.classList.toggle('hidden');
+  if(!box.classList.contains('hidden')){S.selected=null;document.getElementById('synopsis').classList.add('hidden');reroll();document.getElementById('customPremise').focus();}}
+
+/* =================== PROVIDER =================== */
+const MODELS={gemini:["gemini-2.5-flash","gemini-2.5-pro","gemini-2.0-flash"],claude:["claude-sonnet-4-6","claude-opus-4-8","claude-haiku-4-5-20251001"]};
+function setProv(p){S.prov=p;
+  document.querySelectorAll('[data-prov]').forEach(el=>el.setAttribute('aria-selected',el.dataset.prov===p));
+  const box=document.getElementById('apiBox');
+  if(p==='offline'){box.classList.remove('show');return;}
+  box.classList.add('show');
+  document.getElementById('provName').textContent=p==='gemini'?'Gemini':'Claude';
+  document.getElementById('apiModel').innerHTML=MODELS[p].map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+/* =================== COPY =================== */
+function copyText(text,btn){
+  const done=()=>{const o=btn.textContent;btn.textContent='¡Copiado! ✓';btn.classList.add('copy-ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copy-ok');},1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));}
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,done){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);}
+function copyEl(id,btn){const el=document.getElementById(id);copyText(el.value!==undefined?el.value:el.textContent,btn);}
+
+/* =================== INIT =================== */
+function syncClips(v){v=Math.max(12,Math.min(25,parseInt(v)||16));S.clips=v;
+  document.getElementById('clipsNum').textContent=v;document.getElementById('clipsRange').value=v;document.getElementById('clipsInput').value=v;}
+document.getElementById('clipsRange').addEventListener('input',e=>syncClips(e.target.value));
+document.getElementById('clipsInput').addEventListener('input',e=>syncClips(e.target.value));
+let st;document.getElementById('search').addEventListener('input',()=>{clearTimeout(st);st=setTimeout(()=>renderIdeas(true),150);});
+S.ideas=buildIdeas();
+document.getElementById('ideaCount').textContent=`+${S.ideas.length} ideas offline`;
+renderIdeas(true);reroll();
+</script>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JM BOTS — Prompt Bank</title>
+<meta name="description" content="JM BOTS Prompt Bank — Generador de novelas virales para Veo 3">
+<meta name="google-signin-client_id" content="899116968086-g55lhnfiub2r2ep8jchpo0ul609tunbq.apps.googleusercontent.com">
+<!-- Anti-cache -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+/* =================== VARIABLES GLOBALES =================== */
+:root{
+  --bg:#070707; --bg2:#0f0d0a; --ink:#f6f1e6; --muted:#9b927e;
+  --gold:#d4af37; --gold2:#f3d77a; --gold3:#b8902c; --gold-deep:#8a6c1e;
+  --card:#100e0b; --card2:#171410; --line:#3a3220; --ok:#e8c75a; --bad:#c0392b;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 560px at 82% -12%, rgba(212,175,55,.16), transparent 60%),
+    radial-gradient(800px 460px at 0% 8%, rgba(243,215,122,.07), transparent 55%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+  color:var(--ink); font-family:var(--sans); line-height:1.5; min-height:100vh;
+  -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.045;
+  background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px);
+  background-size:3px 3px;z-index:0}
+
+/* =================== LOGIN SCREEN =================== */
+.login-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;position:relative;z-index:10;padding:20px;
+}
+.login-box{
+  background:linear-gradient(180deg,rgba(16,14,11,.92),rgba(23,20,16,.95));
+  border:1px solid var(--line);border-radius:24px;padding:48px 40px;
+  max-width:440px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 120px rgba(212,175,55,.08);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  animation:loginFadeIn .7s ease-out;
+}
+@keyframes loginFadeIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-logo{font-family:var(--serif);font-style:italic;font-weight:700;letter-spacing:1px;
+  font-size:clamp(38px,8vw,58px);line-height:.95;
+  background:linear-gradient(92deg,var(--gold3),var(--gold2) 45%,var(--gold) 70%,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 46px rgba(212,175,55,.28);margin-bottom:8px}
+.login-tag{color:var(--muted);font-size:13px;letter-spacing:3px;text-transform:uppercase;margin-bottom:32px}
+.login-subtitle{color:var(--gold2);font-size:15px;margin-bottom:28px;font-weight:600}
+.login-divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:20px 0}
+.login-secure{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12px;margin-top:16px}
+.login-secure svg{width:14px;height:14px;fill:var(--gold)}
+.login-error{color:var(--bad);font-size:13px;margin-top:14px;display:none;animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#g_id_onload,#googleBtn{display:flex;justify-content:center;margin:0 auto}
+.login-glow{position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,175,55,.12),transparent 70%);
+  top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:-1}
+
+/* =================== MAIN APP (oculta hasta login) =================== */
+#app{display:none;position:relative;z-index:1}
+
+/* =================== TOP BAR =================== */
+.top-bar{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(180deg,rgba(7,7,7,.97),rgba(7,7,7,.85));
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.top-brand{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;
+  background:linear-gradient(92deg,var(--gold3),var(--gold2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:nowrap}
+.top-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab-btn{
+  cursor:pointer;border:1px solid var(--line);border-radius:999px;
+  padding:8px 18px;font-size:13px;font-weight:600;font-family:var(--sans);
+  color:var(--muted);background:transparent;letter-spacing:.3px;
+  transition:all .2s ease;
+}
+.tab-btn:hover{border-color:var(--gold);color:var(--ink)}
+.tab-btn.active{border-color:var(--gold);color:#0e0a02;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));font-weight:700}
+.top-right{display:flex;align-items:center;gap:12px}
+.user-info{display:flex;align-items:center;gap:8px}
+.user-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--gold)}
+.user-name{font-size:12px;color:var(--gold2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout-btn{
+  cursor:pointer;border:1px solid var(--line);border-radius:9px;
+  padding:6px 14px;font-size:12px;font-weight:600;font-family:var(--sans);
+  color:var(--muted);background:transparent;transition:all .15s ease;
+}
+.logout-btn:hover{border-color:var(--bad);color:var(--bad)}
+
+/* =================== MÓDULO COMPARTIDO =================== */
+.module{display:none;animation:moduleIn .4s ease}
+.module.active{display:block}
+@keyframes moduleIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px;position:relative;z-index:1}
+header.brand{text-align:center;margin:8px 0 26px}
+.logo{font-family:var(--serif);font-style:italic;font-weight:700;letter-spacing:1px;
+  font-size:clamp(34px,7vw,64px);line-height:.95;
+  background:linear-gradient(92deg,var(--gold3),var(--gold2) 45%,var(--gold) 70%,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 46px rgba(212,175,55,.28)}
+.tag{margin-top:8px;color:var(--muted);font-size:12.5px;letter-spacing:4px;text-transform:uppercase}
+.ribbon{display:inline-block;margin-top:14px;font-size:12px;letter-spacing:1px;
+  border:1px solid var(--line);border-radius:999px;padding:6px 15px;color:var(--gold2);
+  background:rgba(212,175,55,.06)}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+  border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 18px 56px rgba(0,0,0,.5)}
+.step{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;
+  width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,var(--gold-deep));color:#100c04;
+  box-shadow:0 0 0 1px rgba(243,215,122,.25)}
+.step h2{margin:0;font-size:18px;letter-spacing:.3px}
+.step p{margin:2px 0 0;color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;letter-spacing:.4px}
+input,select,textarea,button{font-family:var(--sans);font-size:15px}
+input[type=text],input[type=password],input[type=number],select,textarea{
+  width:100%;background:#0a0805;border:1px solid var(--line);color:var(--ink);
+  border-radius:11px;padding:11px 12px;outline:none;-webkit-user-select:text;user-select:text}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:70px;-webkit-user-select:text;user-select:text}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.row>div{flex:1;min-width:160px}
+.clips-ctrl{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.clips-num{font-family:var(--serif);font-style:italic;font-size:48px;color:var(--gold2);
+  min-width:74px;text-align:center;text-shadow:0 0 24px rgba(212,175,55,.4)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:8px;
+  background:linear-gradient(90deg,var(--gold-deep),var(--gold2));flex:1;min-width:180px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;
+  border-radius:50%;background:var(--gold2);border:3px solid #070707;cursor:pointer;
+  box-shadow:0 0 0 3px rgba(212,175,55,.35)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold2);
+  border:3px solid #070707;cursor:pointer}
+.btn{cursor:pointer;border:none;border-radius:11px;padding:12px 18px;font-weight:700;
+  letter-spacing:.4px;transition:transform .08s ease,filter .15s ease}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,var(--gold-deep));color:#0e0a02;font-size:16px}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--gold)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold-deep));color:#0e0a02}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;
+  background:transparent}
+.pill[aria-selected=true]{border-color:var(--gold);color:#0e0a02;background:linear-gradient(135deg,var(--gold2),var(--gold));font-weight:700}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.search-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search-bar input{flex:1;min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.idea{background:#0a0805;border:1px solid var(--line);border-radius:13px;padding:14px;
+  cursor:pointer;transition:border-color .15s,transform .1s}
+.idea:hover{border-color:var(--gold);transform:translateY(-2px)}
+.idea.sel{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2)}
+.idea .it{font-weight:700;font-size:15px;margin:0 0 6px}
+.idea .ix{font-size:12.5px;color:var(--muted);margin:3px 0}
+.idea .ix b{color:var(--gold2);font-weight:600}
+.idea .idnum{float:right;font-size:11px;color:#6b5d35;font-family:var(--serif);font-style:italic}
+.cast-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cast-row{background:#0a0805;border:1px solid var(--line);border-radius:11px;padding:11px}
+.cast-row .slot{font-size:11px;color:var(--gold2);letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px}
+.cast-row .ff{display:flex;gap:8px}
+.cast-row .ff>div{flex:1}
+@media(max-width:620px){.cast-grid{grid-template-columns:1fr}}
+.lote-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.lote-head .lt{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--gold2)}
+.lote-head .lt small{font-style:normal;font-family:var(--sans);font-size:12px;color:var(--muted);
+  display:block;letter-spacing:.4px}
+.out{background:#050403;border:1px solid var(--line);border-radius:11px;padding:14px;
+  white-space:pre-wrap;word-break:break-word;font-size:13.5px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  color:#ece4d2;max-height:440px;overflow:auto;line-height:1.7;
+  -webkit-user-select:none;user-select:none}
+.clip{background:#050403;border:1px solid var(--line);border-radius:11px;margin:10px 0;overflow:hidden}
+.clip-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;
+  background:rgba(212,175,55,.07);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.clip-top .ct{font-weight:700;font-size:13px;letter-spacing:.3px;color:var(--gold2)}
+.clip-top .right{display:flex;align-items:center;gap:8px}
+.wc{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;letter-spacing:.5px}
+.wc.ok{background:rgba(232,199,90,.16);color:var(--ok);border:1px solid rgba(232,199,90,.45)}
+.wc.bad{background:rgba(192,57,43,.16);color:#e08a80;border:1px solid rgba(192,57,43,.5)}
+.clip pre{margin:0;padding:13px;white-space:pre-wrap;word-break:break-word;font-size:13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;color:#ece4d2;line-height:1.65}
+.copy-ok{color:var(--gold2)!important}
+.api-box{display:none}
+.api-box.show{display:block}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.footer{text-align:center;color:#6b5d35;font-size:12px;margin-top:30px;line-height:1.8}
+.badge-feature{display:inline-block;font-size:11px;color:var(--gold2);border:1px solid rgba(212,175,55,.4);
+  border-radius:999px;padding:3px 9px;margin:2px}
+.synopsis{border-left:3px solid var(--gold);padding:4px 0 4px 14px;margin:6px 0 0}
+.synopsis .st{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--gold2)}
+.synopsis .sx{font-size:13px;color:var(--muted);margin-top:4px}
+.hidden{display:none}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.part-badge{display:inline-block;font-size:12px;color:#0e0a02;font-weight:700;border-radius:999px;
+  padding:4px 12px;margin-left:8px;background:linear-gradient(135deg,var(--gold2),var(--gold))}
+
+/* =================== OVERLAY ANTI-DEVTOOLS =================== */
+#devtools-overlay{
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(0,0,0,.97);
+  flex-direction:column;align-items:center;justify-content:center;
+  color:var(--bad);font-size:22px;font-weight:700;text-align:center;padding:40px;
+}
+#devtools-overlay .sub{color:var(--muted);font-size:14px;margin-top:12px;font-weight:400}
+</style>
+</head>
+<body>
+
+<!-- =================== DEVTOOLS OVERLAY =================== -->
+<div id="devtools-overlay">
+  🚫 Acceso no autorizado detectado
+  <div class="sub">Por favor cierra las herramientas de desarrollo para continuar.</div>
+</div>
+
+<!-- =================== LOGIN SCREEN =================== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-glow"></div>
+    <div class="login-logo">JM BOTS</div>
+    <div class="login-tag">Prompt Bank</div>
+    <div class="login-divider"></div>
+    <div class="login-subtitle">🔐 Inicia sesión para acceder</div>
+    <div id="googleBtn" style="display:flex;justify-content:center"></div>
+    <div id="loginError" class="login-error">⚠️ Tu email no está autorizado para acceder.</div>
+    <div class="login-divider"></div>
+    <div class="login-secure">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+      Conexión segura · Solo emails autorizados
+    </div>
+  </div>
+</div>
+
+<!-- =================== MAIN APP =================== -->
+<div id="app">
+  <!-- TOP BAR -->
+  <nav class="top-bar">
+    <div class="top-brand">JM BOTS</div>
+    <div class="top-tabs">
+      <button class="tab-btn active" onclick="switchModule('glam')" id="tabGlam">🍯 GLAM · Cosméticos</button>
+      <button class="tab-btn" onclick="switchModule('frutas')" id="tabFrutas">🍉 FRUTAS</button>
+    </div>
+    <div class="top-right">
+      <div class="user-info">
+        <img id="userAvatar" class="user-avatar" src="" alt="avatar">
+        <span id="userName" class="user-name"></span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <!-- =================== MÓDULO GLAM (COSMÉTICOS) =================== -->
+  <div id="module-glam" class="module active">
+    <div class="wrap">
+      <header class="brand">
+        <div class="logo">JM BOTS GLAM</div>
+        <div class="tag">Fábrica de novelas de productos de belleza · Veo 3</div>
+        <div><span class="ribbon" id="glam-ideaCount">+5000 ideas offline</span></div>
+      </header>
+
+      <!-- PASO 1 -->
+      <section class="card">
+        <div class="step"><div class="num">1</div>
+          <div><h2>¿Cuántos clips quieres crear?</h2><p>Cada clip = 8s en Veo 3 · diálogo exacto de 19 palabras</p></div></div>
+        <div class="clips-ctrl">
+          <span class="clips-num" id="glam-clipsNum">16</span>
+          <input type="range" id="glam-clipsRange" min="12" max="25" value="16">
+          <input type="number" id="glam-clipsInput" min="12" max="25" value="16" style="max-width:90px">
+        </div>
+        <div class="hint">Mínimo 12 · máximo 25 clips para armar el video completo.</div>
+        <div class="divider"></div>
+        <label>Motor de generación</label>
+        <div class="row" style="align-items:center;gap:8px">
+          <div style="flex:0 0 auto"><span class="pill" data-glam-prov="offline" aria-selected="true" onclick="GLAM.setProv('offline')">⚡ Offline (sin conexión)</span></div>
+          <div style="flex:0 0 auto"><span class="pill" data-glam-prov="gemini" aria-selected="false" onclick="GLAM.setProv('gemini')">✦ Gemini (API key)</span></div>
+          <div style="flex:0 0 auto"><span class="pill" data-glam-prov="claude" aria-selected="false" onclick="GLAM.setProv('claude')">✦ Claude (API key)</span></div>
+        </div>
+        <div class="api-box" id="glam-apiBox" style="margin-top:14px">
+          <div class="row">
+            <div><label>API Key (<span id="glam-provName">Gemini</span>) — no se guarda, solo en esta sesión</label>
+              <input type="password" id="glam-apiKey" placeholder="pega tu API key aquí" autocomplete="off"></div>
+            <div style="flex:0 0 240px"><label>Modelo</label><select id="glam-apiModel"></select></div>
+          </div>
+          <div class="hint">El modo offline funciona siempre. La API solo se usa si pegas una key válida; si falla, vuelve a offline.</div>
+        </div>
+        <div class="divider"></div>
+        <label>Catálogo de personajes (productos)</label>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="pill" id="glam-intimToggle" aria-selected="false" onclick="GLAM.toggleIntimos()">🔞 Incluir productos íntimos (condón, tampón, etc.)</span>
+          <span class="hint" style="margin:0">Por defecto solo belleza + higiene. Los íntimos son más virales pero pueden limitar el alcance en YouTube/TikTok.</span>
+        </div>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="card">
+        <div class="step"><div class="num">2</div>
+          <div><h2>Elige la historia</h2><p>Banco de +5000 ganchos virales · busca, filtra o pide una al azar</p></div></div>
+        <div class="search-bar">
+          <input type="text" id="glam-search" placeholder="Buscar (traición, ADN, herencia, gemela, embarazo, venganza...)">
+          <button class="btn btn-gold btn-sm" onclick="GLAM.randomIdea()">🎲 Idea al azar</button>
+          <button class="btn btn-ghost btn-sm" onclick="GLAM.toggleCustom()">✍️ Idea personalizada</button>
+        </div>
+        <div id="glam-customBox" class="hidden" style="margin-bottom:14px">
+          <label>Tu premisa (la usará el motor para armar la trama)</label>
+          <textarea id="glam-customPremise" placeholder="Ej: La empleada descubre que su patrona le robó la identidad hace años y planea su venganza el día de la boda."></textarea>
+        </div>
+        <div class="grid" id="glam-ideaGrid"></div>
+        <div style="text-align:center;margin-top:14px">
+          <button class="btn btn-ghost btn-sm" id="glam-moreBtn" onclick="GLAM.renderMore()">Ver más ideas ▾</button>
+        </div>
+      </section>
+
+      <!-- PASO 3 -->
+      <section class="card">
+        <div class="step"><div class="num">3</div>
+          <div><h2>El reparto (hasta 6 personajes)</h2><p>Auto-asignado según la historia · editable · nombres propios = 1 palabra</p></div></div>
+        <div id="glam-synopsis" class="synopsis hidden"></div>
+        <div class="cast-grid" id="glam-castGrid" style="margin-top:14px"></div>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="margin:0">Parte del video</label>
+          <select id="glam-partSel" style="max-width:150px" onchange="GLAM.S.part=+this.value">
+            <option value="1">Parte 1</option><option value="2">Parte 2</option>
+            <option value="3">Parte 3</option><option value="4">Parte 4</option><option value="5">Parte 5</option>
+          </select>
+          <span class="hint" style="margin:0">La Parte 2 en adelante continúa la historia desde el cliffhanger, con el mismo reparto.</span>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="glam-genBtn" onclick="GLAM.generate()">🍯 Generar los 3 lotes</button>
+          <button class="btn btn-ghost btn-sm" onclick="GLAM.reroll()">↻ Otro reparto</button>
+        </div>
+        <div class="hint">Lote 1 = personajes (1 por línea) · Lote 2 = escenas lineales · Lote 3 = animación lineal + guion (19 palabras/clip, 3–4 personajes).</div>
+      </section>
+
+      <!-- RESULTADOS GLAM -->
+      <section id="glam-results" class="hidden">
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 1 · Personajes<small>Un personaje por línea · pega cada línea en Veo 3 / Flow</small></div>
+            <button class="btn btn-gold btn-sm" onclick="GLAM.copyEl('glam-out1',this)">Copiar Lote 1</button></div>
+          <div class="out" id="glam-out1"></div>
+        </div>
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 2 · Escenas<small>Un prompt por línea · con los nombres del reparto</small></div>
+            <button class="btn btn-gold btn-sm" onclick="GLAM.copyEl('glam-out2',this)">Copiar Lote 2</button></div>
+          <div class="out" id="glam-out2"></div>
+        </div>
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 3 · Animación + Guion<small>Un solo lote · un prompt por línea (separados por enter) · 19 palabras exactas por clip</small></div>
+            <div class="right" style="display:flex;align-items:center;gap:8px">
+              <span class="wc" id="glam-out3check"></span>
+              <button class="btn btn-gold btn-sm" onclick="GLAM.copyEl('glam-out3',this)">Copiar Lote 3</button>
+            </div></div>
+          <div class="out" id="glam-out3"></div>
+        </div>
+        <div style="text-align:center;margin:8px 0 4px">
+          <button class="btn btn-primary" onclick="GLAM.nextPart()">▶ Generar Parte siguiente (continúa la historia)</button>
+          <div class="hint">Mantiene el mismo reparto y retoma desde el cliffhanger.</div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span class="badge-feature">⚡ Offline</span>
+        <span class="badge-feature">19 palabras/clip</span>
+        <span class="badge-feature">3–4 personajes</span>
+        <span class="badge-feature">Veo 3 · 8s</span>
+        <span class="badge-feature">Gemini / Claude</span>
+        <br>JM BOTS GLAM — generador de novelas de productos de belleza e higiene.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== MÓDULO FRUTAS =================== -->
+  <div id="module-frutas" class="module">
+    <div class="wrap">
+      <header class="brand">
+        <div class="logo">JM BOTS FRUTAS</div>
+        <div class="tag">Fábrica de novelas de frutas · Veo 3</div>
+        <div><span class="ribbon" id="frutas-ideaCount">+5000 ideas offline</span></div>
+      </header>
+
+      <!-- PASO 1 -->
+      <section class="card">
+        <div class="step"><div class="num">1</div>
+          <div><h2>¿Cuántos clips quieres crear?</h2><p>Cada clip = 8s en Veo 3 · diálogo exacto de 19 palabras</p></div></div>
+        <div class="clips-ctrl">
+          <span class="clips-num" id="frutas-clipsNum">16</span>
+          <input type="range" id="frutas-clipsRange" min="12" max="25" value="16">
+          <input type="number" id="frutas-clipsInput" min="12" max="25" value="16" style="max-width:90px">
+        </div>
+        <div class="hint">Mínimo 12 · máximo 25 clips para armar el video completo.</div>
+        <div class="divider"></div>
+        <label>Motor de generación</label>
+        <div class="row" style="align-items:center;gap:8px">
+          <div style="flex:0 0 auto"><span class="pill" data-frutas-prov="offline" aria-selected="true" onclick="FRUTAS.setProv('offline')">⚡ Offline (sin conexión)</span></div>
+          <div style="flex:0 0 auto"><span class="pill" data-frutas-prov="gemini" aria-selected="false" onclick="FRUTAS.setProv('gemini')">✦ Gemini (API key)</span></div>
+          <div style="flex:0 0 auto"><span class="pill" data-frutas-prov="claude" aria-selected="false" onclick="FRUTAS.setProv('claude')">✦ Claude (API key)</span></div>
+        </div>
+        <div class="api-box" id="frutas-apiBox" style="margin-top:14px">
+          <div class="row">
+            <div><label>API Key (<span id="frutas-provName">Gemini</span>) — no se guarda, solo en esta sesión</label>
+              <input type="password" id="frutas-apiKey" placeholder="pega tu API key aquí" autocomplete="off"></div>
+            <div style="flex:0 0 240px"><label>Modelo</label><select id="frutas-apiModel"></select></div>
+          </div>
+          <div class="hint">El modo offline funciona siempre. La API solo se usa si pegas una key válida; si falla, vuelve a offline.</div>
+        </div>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="card">
+        <div class="step"><div class="num">2</div>
+          <div><h2>Elige la historia</h2><p>Banco de +5000 ganchos virales · busca, filtra o pide una al azar</p></div></div>
+        <div class="search-bar">
+          <input type="text" id="frutas-search" placeholder="Buscar (traición, ADN, herencia, gemela, embarazo, venganza...)">
+          <button class="btn btn-gold btn-sm" onclick="FRUTAS.randomIdea()">🎲 Idea al azar</button>
+          <button class="btn btn-ghost btn-sm" onclick="FRUTAS.toggleCustom()">✍️ Idea personalizada</button>
+        </div>
+        <div id="frutas-customBox" class="hidden" style="margin-bottom:14px">
+          <label>Tu premisa (la usará el motor para armar la trama)</label>
+          <textarea id="frutas-customPremise" placeholder="Ej: La empleada descubre que su patrona le robó la identidad hace años y planea su venganza el día de la boda."></textarea>
+        </div>
+        <div class="grid" id="frutas-ideaGrid"></div>
+        <div style="text-align:center;margin-top:14px">
+          <button class="btn btn-ghost btn-sm" id="frutas-moreBtn" onclick="FRUTAS.renderMore()">Ver más ideas ▾</button>
+        </div>
+      </section>
+
+      <!-- PASO 3 -->
+      <section class="card">
+        <div class="step"><div class="num">3</div>
+          <div><h2>El reparto (hasta 6 personajes)</h2><p>Auto-asignado según la historia · editable · nombres propios = 1 palabra</p></div></div>
+        <div id="frutas-synopsis" class="synopsis hidden"></div>
+        <div class="cast-grid" id="frutas-castGrid" style="margin-top:14px"></div>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="margin:0">Parte del video</label>
+          <select id="frutas-partSel" style="max-width:150px" onchange="FRUTAS.S.part=+this.value">
+            <option value="1">Parte 1</option><option value="2">Parte 2</option>
+            <option value="3">Parte 3</option><option value="4">Parte 4</option><option value="5">Parte 5</option>
+          </select>
+          <span class="hint" style="margin:0">La Parte 2 en adelante continúa la historia desde el cliffhanger, con el mismo reparto.</span>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="frutas-genBtn" onclick="FRUTAS.generate()">🍉 Generar los 3 lotes</button>
+          <button class="btn btn-ghost btn-sm" onclick="FRUTAS.reroll()">↻ Otro reparto</button>
+        </div>
+        <div class="hint">Lote 1 = personajes (1 por línea) · Lote 2 = escenas lineales · Lote 3 = animación lineal + guion (19 palabras/clip, 3–4 personajes).</div>
+      </section>
+
+      <!-- RESULTADOS FRUTAS -->
+      <section id="frutas-results" class="hidden">
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 1 · Personajes<small>Un personaje por línea · pega cada línea en Veo 3 / Flow</small></div>
+            <button class="btn btn-gold btn-sm" onclick="FRUTAS.copyEl('frutas-out1',this)">Copiar Lote 1</button></div>
+          <div class="out" id="frutas-out1"></div>
+        </div>
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 2 · Escenas<small>Un prompt por línea · con los nombres del reparto</small></div>
+            <button class="btn btn-gold btn-sm" onclick="FRUTAS.copyEl('frutas-out2',this)">Copiar Lote 2</button></div>
+          <div class="out" id="frutas-out2"></div>
+        </div>
+        <div class="card">
+          <div class="lote-head"><div class="lt">LOTE 3 · Animación + Guion<small>Un solo lote · un prompt por línea (separados por enter) · 19 palabras exactas por clip</small></div>
+            <div class="right" style="display:flex;align-items:center;gap:8px">
+              <span class="wc" id="frutas-out3check"></span>
+              <button class="btn btn-gold btn-sm" onclick="FRUTAS.copyEl('frutas-out3',this)">Copiar Lote 3</button>
+            </div></div>
+          <div class="out" id="frutas-out3"></div>
+        </div>
+        <div style="text-align:center;margin:8px 0 4px">
+          <button class="btn btn-primary" onclick="FRUTAS.nextPart()">▶ Generar Parte siguiente (continúa la historia)</button>
+          <div class="hint">Mantiene el mismo reparto y retoma desde el cliffhanger.</div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span class="badge-feature">⚡ Offline</span>
+        <span class="badge-feature">19 palabras/clip</span>
+        <span class="badge-feature">3–4 personajes</span>
+        <span class="badge-feature">Veo 3 · 8s</span>
+        <span class="badge-feature">Gemini / Claude</span>
+        <br>JM BOTS FRUTAS — generador de novelas de frutas.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   AUTH — Google Sign-In + lista de emails autorizados
+   ================================================================= */
+const GOOGLE_CLIENT_ID = '899116968086-g55lhnfiub2r2ep8jchpo0ul609tunbq.apps.googleusercontent.com';
+
+// ★★★ AUTORIZACIÓN GESTIONADA EN GOOGLE CLOUD CONSOLE ★★★
+// Para dar acceso, agrega los correos en la pestaña "Pantalla de consentimiento de OAuth" -> "Usuarios de prueba" de tu proyecto de Google.
+
+function initGoogleSignIn(){
+  if(typeof google==='undefined'||!google.accounts){
+    setTimeout(initGoogleSignIn,300);return;
+  }
+  google.accounts.id.initialize({
+    client_id:GOOGLE_CLIENT_ID,
+    callback:handleCredentialResponse,
+    auto_select:false,
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('googleBtn'),
+    {theme:'outline',size:'large',text:'signin_with',shape:'pill',logo_alignment:'center',width:300}
+  );
+}
+
+function decodeJwt(token){
+  const b=token.split('.')[1];
+  const json=atob(b.replace(/-/g,'+').replace(/_/g,'/'));
+  return JSON.parse(json);
+}
+
+function handleCredentialResponse(response){
+  try{
+    const user=decodeJwt(response.credential);
+    const email=(user.email||'').toLowerCase();
+    
+    // Al delegar a Google, cualquier token válido que llegue aquí ya fue autorizado por Google Cloud Console
+    sessionStorage.setItem('jm_user',JSON.stringify({name:user.name,email:email,picture:user.picture,token:response.credential}));
+    showApp(user);
+  }catch(e){
+    console.error('Error al decodificar token:',e);
+    alert('Error al iniciar sesión. Intenta de nuevo.');
+  }
+}
+
+function showApp(user){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('userAvatar').src=user.picture||'';
+  document.getElementById('userName').textContent=user.name||user.email||'';
+  // init modules
+  GLAM.init();
+  FRUTAS.init();
+}
+
+function doLogout(){
+  sessionStorage.removeItem('jm_user');
+  if(typeof google!=='undefined'&&google.accounts) google.accounts.id.disableAutoSelect();
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginError').style.display='none';
+}
+
+// Check session
+(function(){
+  const saved=sessionStorage.getItem('jm_user');
+  if(saved){try{showApp(JSON.parse(saved));}catch(e){sessionStorage.removeItem('jm_user');}}
+  initGoogleSignIn();
+})();
+
+/* =================================================================
+   MODULE TABS
+   ================================================================= */
+function switchModule(mod){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('module-'+mod).classList.add('active');
+  document.getElementById('tab'+mod.charAt(0).toUpperCase()+mod.slice(1)).classList.add('active');
+}
+
+/* =================================================================
+   SHARED UTILITIES
+   ================================================================= */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function pick(rng,arr){return arr[Math.floor(rng()*arr.length)];}
+function fill(str,names){return str.replace(/\{([A-F])\}/g,(m,k)=>names[k]||m);}
+function wc(text){return(text.replace(/[.,;:¿?¡!"]/g,' ').split(/\s+/).filter(Boolean)).length;}
+
+const SLOTS_ALL=['A','B','C','D','E','F'];
+const SLOT_DEF = {
+  A:{noun:"businesswoman",hair:"long dark brown wavy hair flowing behind the head",
+     outfit:"elegant light beige tailored suit, white blouse, silver necklace with three tiny stars",
+     expr:"elegant, kind and quietly determined expression",
+     voz:{tom:"medio-agudo",emocao:"determinada",estilo:"firme con dolor contenido"}},
+  B:{noun:"businessman",hair:"short slicked-back black hair",
+     outfit:"luxury black tailored Italian business suit, white shirt, dark gold tie, expensive watch",
+     expr:"arrogant, dominant and resentful expression",
+     voz:{tom:"grave",emocao:"furioso",estilo:"amenazante"}},
+  C:{noun:"little girl",hair:"long braided hair",
+     outfit:"pink cardigan, white dress, small white sneakers",
+     expr:"sweet, innocent and emotional expression",
+     voz:{tom:"agudo",emocao:"asustada",estilo:"voz infantil"}},
+  D:{noun:"lawyer",hair:"hair in a tight neat bun",
+     outfit:"sharp navy lawyer suit, thin glasses, a leather folder in hand",
+     expr:"serious, sharp and confident expression",
+     voz:{tom:"medio",emocao:"serio",estilo:"declarativo"}},
+  E:{noun:"young man (loyal ally)",hair:"slightly wavy dark hair",
+     outfit:"smart casual navy blazer over an open-collar white shirt",
+     expr:"warm, loyal and worried expression",
+     voz:{tom:"medio",emocao:"preocupado",estilo:"sincero"}},
+  F:{noun:"elder matriarch",hair:"silver hair in an elegant updo",
+     outfit:"refined dark green gown with a pearl necklace",
+     expr:"stern, proud and commanding expression",
+     voz:{tom:"grave-medio",emocao:"severa",estilo:"autoritario"}},
+};
+const SLOT_ES_DEF={A:"PROTAGONISTA",B:"VILLANO",C:"NIÑA",D:"ABOGADA / TERCERO",E:"AMANTE / ALIADO",F:"MATRIARCA / SUEGRA"};
+
+const DLG_DEF = {
+ presentacion:[
+  [["A","Hoy presentamos a la familia un anuncio que lo cambiará todo."],["F","Espero que sea algo digno."],["B","Yo lo dudo."]],
+  [["A","{B}, nuestra hija merece crecer en una casa llena de amor verdadero."],["B","El amor no paga."],["C","Papá, no peleen."]],
+ ],
+ gancho:[
+  [["A","Encontré estos papeles escondidos y exijo que alguien me explique qué significan."],["B","No te metas."],["E","{A}, déjame ayudarte ahora."]],
+  [["A","{B}, hallé una prueba de embarazo que tú juraste jamás sería posible."],["B","Puedo explicarlo."],["F","Más te vale explicarlo, hijo."]],
+ ],
+ sospecha:[[["B","{A} esconde algo grave y hoy mismo pienso descubrir toda la verdad."],["A","No escondo nada."],["D","Cálmense los dos, ahora."]]],
+ descubrimiento:[[["D","Los exámenes confirman lo imposible: esta niña jamás fue hija biológica suya."],["A","Eso es imposible."],["F","Lo sabía desde siempre."]]],
+ tension:[[["B","Tú nunca perteneciste a esta familia y hoy voy a borrarte completamente."],["A","Inténtalo si puedes."],["E","Yo siempre la defiendo."]]],
+ acusacion:[[["A","Durante años callé, pero hoy todos sabrán lo que tú realmente hiciste."],["B","No te atrevas."],["C","Mamá, diles la verdad."]]],
+ revelacion:[
+  [["D","Apareció un segundo testamento y según él tú jamás fuiste heredera legítima."],["A","No puede ser."],["B","Es falso."],["F","Yo firmé."]],
+  [["D","Tengo pruebas: esta mujer robó tu nombre, tu herencia y tu vida."],["A","Demuéstralo ahora."],["E","Yo la apoyo."],["B","Mienten todos."]],
+ ],
+ traicion:[[["B","Llevo meses fingiendo amor mientras planeaba quitarte absolutamente todo lo que amas."],["A","Eres un monstruo."],["E","Yo siempre te creí."]]],
+ confrontacion:[[["A","Hoy se acaba tu reinado y toda la familia conocerá tu verdad."],["B","Cállate ya."],["F","Habla, hija."],["C","Sí, mami, habla."]]],
+ suplica:[[["A","Por favor no hagas esto frente a la niña, ella es inocente."],["B","Debiste pensarlo antes."],["C","Papá, no, por favor."]]],
+ amenaza:[[["B","Esto apenas comienza y pronto entenderás que jamás debiste meterte conmigo, querida."],["A","No te temo."],["E","Yo estoy contigo siempre."]]],
+ cliffhanger:[
+  [["C","Mamá, alguien llega y dice traer noticias que cambiarán nuestra vida entera."],["A","No abras todavía."],["D","Ya es demasiado tarde."]],
+  [["D","La prueba de paternidad llegó y su resultado destruirá a esta familia."],["A","Léelo ahora mismo."],["B","Espera."],["F","No, dámelo ya."]],
+ ],
+};
+const BEAT_ES_DEF={presentacion:"PRESENTACIÓN",gancho:"EL DESCUBRIMIENTO",sospecha:"LA SOSPECHA",descubrimiento:"LA PISTA",
+ tension:"TENSIÓN",acusacion:"LA ACUSACIÓN",revelacion:"LA REVELACIÓN",traicion:"LA TRAICIÓN",
+ confrontacion:"LA CONFRONTACIÓN",suplica:"LA SÚPLICA",amenaza:"LA AMENAZA",cliffhanger:"CLIFFHANGER"};
+
+const ACTION_DEF={
+ presentacion:"{A} and {B} face each other while {F} watches with cold disapproval.",
+ gancho:"{A} confronts {B} with new evidence while {E} steps in to protect her.",
+ sospecha:"{B} circles {A} with suspicion as {D} quietly observes the tense exchange.",
+ descubrimiento:"{D} presents shocking proof while {A} reels and {F} reacts with alarm.",
+ tension:"{B} threatens {A} face to face as {E} moves between them protectively.",
+ acusacion:"{A} accuses {B} loudly while {C} clings to her, frightened by the shouting.",
+ revelacion:"{D} exposes a devastating secret as {A}, {B} and {F} freeze in shock.",
+ traicion:"{B} coldly confesses his betrayal while {A} breaks down and {E} looks horrified.",
+ confrontacion:"{A} stands up to {B} as {F} and {C} watch the truth explode open.",
+ suplica:"{A} pleads desperately while {C} cries and {B} stays cold and unmoved.",
+ amenaza:"{B} delivers a chilling threat to {A} while {E} swears to protect her.",
+ cliffhanger:"{C} bursts in with shocking news as {A}, {D} and {F} turn in alarm.",
+};
+const LOCATIONS_DEF=[
+ "Luxury modern mansion living room, floor-to-ceiling windows",
+ "Corporate conference room after a meeting, glass walls",
+ "Hospital corridor with cold white light",
+ "Elegant courtroom, wood panels and tall windows",
+ "Lush mansion garden at sunset",
+ "Rainy city street at night, neon reflections",
+ "Luxury marble kitchen, warm pendant lights",
+ "Grand staircase of a mansion foyer",
+ "Private office at night, city lights behind the glass",
+ "Candle-lit church interior, stained glass",
+ "Opulent dining room, long table set for dinner",
+ "Penthouse balcony overlooking the city at dusk",
+];
+const CAMERAS_DEF=[
+ "Medium-wide shot, slow push-in","Close-up on {A}'s emotional reaction",
+ "Over-the-shoulder of {B}, ending on {A}","Slow dolly-in ending on a furious face",
+ "Two-shot, slight low angle for drama","Handheld medium shot, subtle shake",
+];
+const LIGHTING_DEF=[
+ "Warm afternoon sunlight with dramatic shadows","Cold corporate lighting with hard shadows",
+ "Stormy blue light through the windows","Golden hour glow, soft rim light",
+ "Harsh overhead light, tense mood","Moody low-key lighting, single warm source",
+];
+const AVOID_DEF="human face, human head, human skin, human facial features, deformed anatomy, inconsistent character design, text overlays, subtitles, watermarks, logos, extra fingers, deformed hands, music";
+const STYLE_SUFFIX_DEF="ultra-realistic textures, high-end rendering, Unreal Engine 5, 8K, physically based rendering, high fashion editorial style";
+const VIEWS_DEF="front full body view, side profile full body view, back full body view, face close-up front view, face close-up side profile";
+
+const ARCH_DEF=[
+ {e:"🍓",t:"El bebé no es de {B}",g:"{A} encuentra una prueba de embarazo escondida",x:"el público cree que hubo traición, pero {B} era infértil",c:"¿Quién mintió sobre la infertilidad?"},
+ {e:"🍉",t:"{A} pasó de rica a pobre",g:"{A} es expulsada de su propia mansión",x:"{B} falsificó los documentos de propiedad",c:"¿Quién es el verdadero heredero?"},
+ {e:"🍍",t:"La boda era una trampa",g:"{B} llega al altar y ve a {A} besando a otro",x:"el beso fue armado para impedir la boda",c:"¿Quién lo organizó todo?"},
+ {e:"🍊",t:"El hijo secreto de {A}",g:"una niña llama mamá a {A}",x:"{A} jura que nunca tuvo hijos",c:"¿Las fotos de {C} son reales?"},
+ {e:"⚰️",t:"El entierro de {A} estando viva",g:"{A} ve su propio entierro",x:"alguien le robó la identidad",c:"¿Cómo lo logró {B}?"},
+ {e:"🧬",t:"El ADN cambiado en el hospital",g:"{A} descubre que no es hija de sus padres",x:"cuatro bebés fueron intercambiados",c:"¿Quién es la verdadera madre?"},
+ {e:"🥝",t:"La venganza de la empleada {A}",g:"{A} derrama vino sobre {B} en la fiesta",x:"años atrás {B} le robó la identidad",c:"¿Revelará todo frente a todos?"},
+ {e:"🍑",t:"La gemela que nunca existió",g:"{B} encuentra a alguien idéntica a {A}",x:"la familia jura que {A} no tiene hermana",c:"¿Quién borró el pasado?"},
+ {e:"📱",t:"El secreto del celular roto",g:"{A} encuentra un celular destruido",x:"contiene videos que comprometen a media ciudad",c:"¿Quién esconde al dueño?"},
+ {e:"💍",t:"El segundo testamento",g:"leen el testamento de un millonario",x:"aparece un segundo testamento escondido",c:"¿{A} o {B} se quedan con todo?"},
+ {e:"👶",t:"No quiero más hijas",g:"{B} amenaza con echar a {A} si nace otra niña",x:"{B} esconde por qué desprecia a las niñas",c:"¿Qué oculta {B} sobre su pasado?"},
+ {e:"💉",t:"La enfermera {A} sabía la verdad",g:"{A} reconoce a {B} de hace veinte años",x:"{B} mandó a {A} a una clínica para callarla",c:"¿Hablará {A} por fin?"},
+ {e:"🔥",t:"El incendio que lo ocultó todo",g:"un incendio destruye la mansión de {B}",x:"el fuego escondía un cadáver y un fraude",c:"¿Quién provocó el incendio?"},
+ {e:"📸",t:"La foto que destruyó la boda",g:"llega una foto comprometedora a la boda de {B}",x:"la foto fue trucada por {F}",c:"¿Por qué quería impedir la boda?"},
+ {e:"🤰",t:"Embarazo de quince años atrás",g:"{C} aparece buscando a su verdadero padre",x:"el padre es {B}, casado con {A}",c:"¿{A} ya lo sabía?"},
+ {e:"💔",t:"El amante que era espía",g:"{A} se enamora de {E} sin saber quién es",x:"{E} fue contratado para arruinarla",c:"¿{E} se enamoró de verdad?"},
+ {e:"🏦",t:"La cuenta secreta",g:"{A} descubre millones en una cuenta a su nombre",x:"{B} la usó para lavar dinero",c:"¿La culparán a ella?"},
+ {e:"👰",t:"La novia equivocada",g:"{B} se casa creyendo que es {A}",x:"era la gemela suplantándola",c:"¿Dónde está la verdadera {A}?"},
+ {e:"🩸",t:"La herencia maldita",g:"{A} hereda una fortuna inesperada",x:"con la condición de vivir con su enemigo {B}",c:"¿Aceptará el trato?"},
+ {e:"📞",t:"La llamada del muerto",g:"{A} recibe una llamada de un familiar enterrado",x:"el muerto está vivo y sabe el secreto",c:"¿Quién lo escondió tantos años?"},
+ {e:"🍇",t:"El veneno en la copa",g:"{B} se desploma en la cena familiar",x:"el veneno estaba destinado a {A}",c:"¿Quién quería matarla?"},
+ {e:"🎭",t:"La identidad robada",g:"{A} descubre a alguien usando su nombre y vida",x:"{B} lleva años fingiendo ser ella",c:"¿Cómo recuperará su vida?"},
+ {e:"🧒",t:"El niño que no envejece",g:"un niño dice ser hijo de {A} de hace décadas",x:"existe una certidão escondida que lo prueba",c:"¿Quién falsificó las fechas?"},
+ {e:"💼",t:"El despido que era venganza",g:"{B} humilla y despide a {A} ante todos",x:"{A} era la dueña secreta de la empresa",c:"¿Cuándo lo revelará?"},
+ {e:"🌹",t:"La carta que llegó tarde",g:"{A} recibe una carta de hace veinte años",x:"revela que {B} la traicionó desde el inicio",c:"¿Es demasiado tarde para vengarse?"},
+ {e:"🏥",t:"El diagnóstico falso",g:"a {A} le dicen que está enferma",x:"{B} sobornó al médico para encerrarla",c:"¿Logrará escapar a tiempo?"},
+ {e:"👑",t:"La reina destronada",g:"{A} pierde el control de su imperio",x:"{B} compró en secreto todas sus acciones",c:"¿Le queda una última jugada?"},
+ {e:"🕯️",t:"El funeral interrumpido",g:"alguien interrumpe el funeral gritando la verdad",x:"el difunto fingió su muerte para huir",c:"¿De qué huía exactamente?"},
+ {e:"🗝️",t:"La habitación cerrada",g:"{A} abre una habitación prohibida de la mansión",x:"adentro están las pruebas del crimen de {B}",c:"¿La descubrirán husmeando?"},
+ {e:"💸",t:"La deuda impagable",g:"{B} exige a {A} pagar una deuda imposible",x:"la deuda fue inventada con papeles falsos",c:"¿Quién falsificó las firmas?"},
+];
+
+const MODELS_DEF={gemini:["gemini-2.5-flash","gemini-2.5-pro","gemini-2.0-flash"],claude:["claude-sonnet-4-6","claude-opus-4-8","claude-haiku-4-5-20251001"]};
+
+/* Shared API functions */
+async function _callGemini(prompt,key,model){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:8192}})});
+  if(!r.ok)throw new Error('Gemini HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const d=await r.json();
+  return (d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+}
+async function _callClaude(prompt,key,model){
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:model,max_tokens:8192,messages:[{role:'user',content:prompt}]})});
+  if(!r.ok)throw new Error('Claude HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const d=await r.json();
+  return (d.content||[]).map(b=>b.text||"").join("");
+}
+function _parseApi(text){
+  let t=text.replace(/```json/gi,'').replace(/```/g,'').trim();
+  const a=t.indexOf('{'),b=t.lastIndexOf('}');
+  if(a>=0&&b>a)t=t.slice(a,b+1);
+  const o=JSON.parse(t);
+  o.lote3=(o.lote3||[]).map(it=>typeof it==='string'?{prompt:it,dialogue:''}:it);
+  return o;
+}
+function _copyText(text,btn){
+  const done=()=>{const o=btn.textContent;btn.textContent='¡Copiado! ✓';btn.classList.add('copy-ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copy-ok');},1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>_fallbackCopy(text,done));}
+  else _fallbackCopy(text,done);
+}
+function _fallbackCopy(text,done){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);}
+
+function buildArc(n,part){
+  part=part||1;
+  const starts={1:['presentacion','gancho'],2:['sospecha','descubrimiento'],3:['acusacion','revelacion'],4:['traicion','confrontacion'],5:['amenaza','revelacion']};
+  const start=starts[part]||['tension','acusacion'];
+  const end=part>=5?['confrontacion','cliffhanger']:['amenaza','cliffhanger'];
+  const mid=['sospecha','descubrimiento','tension','acusacion','revelacion','traicion','confrontacion','suplica'];
+  const need=n-4;const arc=[...start];const off=(part-1)*5;
+  for(let i=0;i<need;i++)arc.push(mid[(i+off)%mid.length]);
+  return arc.concat(end);
+}
+
+/* =================================================================
+   MÓDULO GLAM (COSMÉTICOS)
+   ================================================================= */
+const GLAM = (function(){
+  const PREFIX='glam';
+  const PRODUCTS=[
+   {n:"Labial",en:"lipstick",head:"glossy red lipstick bullet rising from a sleek golden tube, head is the lipstick tube with the colored tip on top",small:false,grupo:"belleza"},
+   {n:"Sombra",en:"eyeshadow palette",head:"open eyeshadow palette with rows of shimmering colorful pressed pigment pans and a small mirror lid",small:false,grupo:"belleza"},
+   {n:"Delineador",en:"eyeliner pen",head:"slim black liquid eyeliner pen with a fine glossy tip",small:true,grupo:"belleza"},
+   {n:"Rímel",en:"mascara",head:"black mascara tube with a spiral wand brush, glossy plastic body",small:true,grupo:"belleza"},
+   {n:"Base",en:"foundation bottle",head:"frosted glass foundation bottle with a pump, beige liquid visible inside",small:false,grupo:"belleza"},
+   {n:"Rubor",en:"blush compact",head:"round blush compact with a rosy pink powder pan and a tiny mirror",small:false,grupo:"belleza"},
+   {n:"Esmalte",en:"nail polish bottle",head:"small glossy nail polish bottle with a black cap, deep red lacquer inside",small:true,grupo:"belleza"},
+   {n:"Perfume",en:"perfume bottle",head:"elegant faceted glass perfume bottle with a golden atomizer cap, amber liquid",small:false,grupo:"belleza"},
+   {n:"Brocha",en:"makeup brush",head:"makeup brush with a rose-gold metal ferrule and soft fluffy bristles on top",small:true,grupo:"belleza"},
+   {n:"Espejo",en:"compact mirror",head:"round closed compact mirror with a pearly iridescent shell case",small:false,grupo:"belleza"},
+   {n:"Rizador",en:"eyelash curler",head:"shiny metallic eyelash curler with pink silicone pads",small:true,grupo:"belleza"},
+   {n:"Crema",en:"face cream jar",head:"round frosted glass face cream jar with a glossy white screw lid",small:false,grupo:"belleza"},
+   {n:"Papel",en:"toilet paper roll",head:"soft white toilet paper roll on a cardboard tube, fluffy quilted texture",small:false,grupo:"higiene"},
+   {n:"Jabón",en:"soap bar",head:"smooth pastel bar of soap with a soft glossy surface and rounded edges",small:false,grupo:"higiene"},
+   {n:"Pasta",en:"toothpaste tube",head:"glossy toothpaste tube with a curl of white paste squeezed out of the top",small:false,grupo:"higiene"},
+   {n:"Cepillo",en:"toothbrush",head:"colorful toothbrush with a slim handle and white bristles on top",small:true,grupo:"higiene"},
+   {n:"Desodorante",en:"deodorant stick",head:"oval deodorant stick with a twist base and a smooth white solid top",small:false,grupo:"higiene"},
+   {n:"Shampoo",en:"shampoo bottle",head:"glossy plastic shampoo bottle with a flip cap, pearly liquid inside",small:false,grupo:"higiene"},
+   {n:"Toallita",en:"wet wipes pack",head:"soft resealable wet wipes pack with one folded wipe peeking out of the lid",small:false,grupo:"higiene"},
+   {n:"Cotonete",en:"cotton swab",head:"single cotton swab with soft fluffy white cotton tips on a thin stick",small:true,grupo:"higiene"},
+   {n:"Loción",en:"body lotion bottle",head:"tall pastel body lotion bottle with a pump dispenser, creamy white lotion",small:false,grupo:"higiene"},
+   {n:"Condón",en:"condom wrapper",head:"square sealed foil condom wrapper with a glossy metallic surface",small:true,grupo:"intimo"},
+   {n:"Tampón",en:"tampon",head:"cylindrical tampon in a smooth pastel wrapper with a small string detail",small:true,grupo:"intimo"},
+   {n:"ToallaF",en:"sanitary pad",head:"folded sanitary pad in a soft pastel individual wrapper",small:false,grupo:"intimo"},
+   {n:"Copa",en:"menstrual cup",head:"soft silicone menstrual cup in a calm pastel color with a small stem",small:true,grupo:"intimo"},
+  ];
+  const STYLE_SCENE="photorealistic anthropomorphic beauty and hygiene product characters, cinematic photorealism, the head is a real product (cosmetic or personal-care item) rendered with accurate packaging, glossy materials and realistic labels, "+STYLE_SUFFIX_DEF+", product heads fully visible, no human faces";
+
+  const S={clips:16,prov:'offline',part:1,ideas:[],shown:0,page:24,selected:null,cast:null,filtered:null,lastBeat:null,partSeed:0,incluirIntimos:false};
+
+  function el(id){return document.getElementById(PREFIX+'-'+id);}
+  function activeProducts(){return S.incluirIntimos?PRODUCTS:PRODUCTS.filter(p=>p.grupo!=='intimo');}
+  function castFruits(rng){
+    const pool=[...activeProducts()];const take=l=>l.splice(Math.floor(rng()*l.length),1)[0];
+    const A=take(pool),B=take(pool);const sp=pool.filter(f=>f.small);const C=take(sp.length?sp:pool);
+    const ci=pool.indexOf(C);if(ci>=0)pool.splice(ci,1);const D=take(pool),E=take(pool),F=take(pool);
+    return {A,B,C,D,E,F};
+  }
+  function buildIdeas(){
+    const out=[],total=5200;
+    for(let i=0;i<total;i++){const rng=mulberry32(i*2654435761+99);const arch=ARCH_DEF[i%ARCH_DEF.length];
+      const fr=castFruits(rng);const names={};SLOTS_ALL.forEach(s=>names[s]=fr[s].n);
+      out.push({id:i+1,arch,fruits:fr,names,title:fill(arch.t,names),g:fill(arch.g,names),x:fill(arch.x,names),c:fill(arch.c,names),
+        search:(arch.t+" "+arch.g+" "+arch.x+" "+arch.c).toLowerCase()});}
+    return out;
+  }
+  function composeFull(slot,fr,name){const m=SLOT_DEF[slot];
+    return `${name}, character reference sheet, anthropomorphic ${fr.en} ${m.noun}, the entire head is a photorealistic ${fr.en}: ${fr.head}, rendered with accurate packaging, glossy materials and realistic labels, large expressive eyes integrated into the product surface, ${m.hair}, wearing ${m.outfit}, ${m.expr}, ${VIEWS_DEF}, clean organized grid layout, multiple views on a clean white background, consistent character design, product head fully visible in every view, no human face, no human skin on the head, ${STYLE_SUFFIX_DEF}.`;}
+  function composeShort(slot,fr,name){const m=SLOT_DEF[slot];
+    return `${name} (anthropomorphic ${fr.en} ${m.noun}, photorealistic ${fr.head}, accurate packaging and glossy materials, product head fully visible, no human face)`;}
+
+  function genOffline(cast,n,part){
+    part=part||1;const arc=buildArc(n,part);const names={};SLOTS_ALL.forEach(s=>names[s]=cast[s].name);
+    const rng=mulberry32((S.selected?S.selected.id:7)*100003+n*31+part*1000003);
+    const used=new Set();const lote2=[],lote3=[];let last=null;const tagP=`Parte ${part}`;
+    const contNota=part>1?` Retoma directamente desde el cliffhanger de la Parte ${part-1}, sin presentar de nuevo a los personajes; la tensión escala respecto a la parte anterior.`:"";
+    arc.forEach((beat,idx)=>{
+      const num=idx+1;const loc=pick(rng,LOCATIONS_DEF);const cam=fill(pick(rng,CAMERAS_DEF),names);const lig=pick(rng,LIGHTING_DEF);
+      const actRaw=ACTION_DEF[beat];const act=fill(actRaw,names);const opts=DLG_DEF[beat]||DLG_DEF.tension;
+      let tpl=pick(rng,opts);if(opts.length>1&&JSON.stringify(tpl)===last)tpl=pick(rng,opts);last=JSON.stringify(tpl);
+      const present=new Set();(actRaw.match(/\{([A-F])\}/g)||[]).forEach(m=>present.add(m[1]));tpl.forEach(([s])=>present.add(s));
+      const presentList=SLOTS_ALL.filter(s=>present.has(s));presentList.forEach(s=>used.add(s));
+      const dialogueAttr=tpl.map(([s,line])=>`${names[s]}: "${fill(line,names)}"`).join("; ");
+      const dialoguePlain=tpl.map(([s,line])=>fill(line,names)).join(" ");
+      const voices=presentList.filter(s=>tpl.some(([sp])=>sp===s)).map(s=>`${names[s]}=${SLOT_DEF[s].voz.emocao}/${SLOT_DEF[s].voz.tom}`).join(", ");
+      const namesTag=presentList.map(s=>`${names[s]} (${cast[s].fruit.en})`).join(", ");
+      const shortDesc=presentList.map(s=>composeShort(s,cast[s].fruit,names[s])).join("; ");
+      lote2.push(`${tagP} · Escena ${num} — ${BEAT_ES_DEF[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${namesTag} | Acción: ${act} | Cámara: ${cam} | Luz: ${lig}${idx===0?" | Continuidad:"+contNota:""}`);
+      const prompt=`${tagP} · Clip ${num} — ${BEAT_ES_DEF[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${shortDesc} | Acción: ${act} | Guion: ${dialogueAttr} | Cámara: ${cam} | Luz: ${lig} | Duración: 8s | Voces: ${voices} | Avoid: ${AVOID_DEF} | Reglas: cabezas de producto siempre visibles, sin rostros humanos, diálogo en español.${idx===0?contNota:""}`;
+      lote3.push({prompt,dialogue:dialoguePlain});
+    });
+    const lote1=SLOTS_ALL.filter(s=>used.has(s)).map(s=>composeFull(s,cast[s].fruit,cast[s].name));
+    return {lote1,lote2,lote3};
+  }
+
+  function buildApiPrompt(cast,n,part){
+    part=part||1;const reparto=SLOTS_ALL.map(s=>`${cast[s].name} (${SLOT_ES_DEF[s]}, ${cast[s].fruit.en})`).join(", ");
+    const premise=S.selected?`${S.selected.title}. Gancho: ${S.selected.g}. Giro: ${S.selected.x}. Cliffhanger: ${S.selected.c}.`:(el('customPremise').value||"Una novela dramática de productos de belleza e higiene con traición y un cliffhanger.");
+    const cont=part>1?`Esta es la PARTE ${part}: continúa la historia justo desde el cliffhanger de la parte anterior, con el MISMO reparto, sin repetir la presentación. La tensión debe escalar respecto a la parte anterior.`:`Esta es la PARTE 1.`;
+    return `Eres un guionista de novelas virales de TikTok con personajes que son productos de belleza e higiene antropomórficos (labiales, sombras, perfumes, papel higiénico, jabones, etc.), para animar en Veo 3 (clips de 8 segundos).\n\nREPARTO (nombres propios, cada uno de 1 sola palabra): ${reparto}\nPREMISA: ${premise}\n${cont}\nNÚMERO DE CLIPS: ${n}\n\nESTILO VISUAL OBLIGATORIO en TODOS los prompts: ${STYLE_SCENE}.\n\nDevuelve EXCLUSIVAMENTE un objeto JSON válido (sin texto extra, sin markdown, sin backticks):\n{\n "lote1": ["..."],\n "lote2": ["..."],\n "lote3": [{"prompt":"...","dialogue":"..."}]\n}\n\nREGLAS ESTRICTAS:\n- "lote2" y "lote3" deben tener exactamente ${n} elementos.\n- Cada elemento es UNA SOLA LÍNEA.\n- En CADA clip deben hablar 3 o 4 personajes distintos.\n- La suma de palabras del "dialogue" de cada clip = EXACTAMENTE 19.\n- Diálogos en español; descripciones visuales en inglés.\n- Mismo producto por personaje, cabeza de producto siempre visible, nunca rostro humano.\n- Arco: ${part>1?'continuación desde el cliffhanger, escalada, revelación, confrontación, amenaza y nuevo cliffhanger.':'presentación, gancho, escalada, revelación, confrontación, amenaza y cliffhanger final.'}`;
+  }
+
+  function renderResults(data){
+    el('out1').textContent=(Array.isArray(data.lote1)?data.lote1.join("\n"):data.lote1);
+    el('out2').textContent=(Array.isArray(data.lote2)?data.lote2.join("\n"):data.lote2);
+    const items=data.lote3||[];
+    el('out3').textContent=items.map(it=>it.prompt).join("\n");
+    const counts=items.map(it=>it.dialogue?wc(it.dialogue):null).filter(c=>c!==null);
+    const chk=el('out3check');
+    if(counts.length){const okN=counts.filter(c=>c===19).length;const allOk=okN===counts.length;
+      chk.className='wc '+(allOk?'ok':'bad');chk.textContent=`${okN}/${counts.length} clips · 19 palabras${allOk?' ✓':' ✗'}`;}
+    else{chk.className='wc';chk.textContent='';}
+    const resultsEl=el('results');
+    resultsEl.querySelectorAll('.lote-head .lt .part-badge').forEach(e=>e.remove());
+    resultsEl.querySelectorAll('.lote-head .lt').forEach(lt=>{const b=document.createElement('span');b.className='part-badge';b.textContent='Parte '+(S.part||1);lt.appendChild(b);});
+    resultsEl.classList.remove('hidden');
+    resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  async function generate(){
+    readCast();const n=S.clips,part=S.part||1,btn=el('genBtn');
+    if(S.prov==='offline'){renderResults(genOffline(S.cast,n,part));return;}
+    const key=el('apiKey').value.trim();const model=el('apiModel').value;
+    if(!key){alert('Pega tu API key o cambia a modo Offline.');return;}
+    btn.textContent='⏳ Generando...';btn.disabled=true;
+    try{const prompt=buildApiPrompt(S.cast,n,part);
+      const text=S.prov==='gemini'?await _callGemini(prompt,key,model):await _callClaude(prompt,key,model);
+      renderResults(_parseApi(text));
+    }catch(err){alert('Falló la API ('+err.message+').\nGenerando en modo Offline como respaldo.');renderResults(genOffline(S.cast,n,part));}
+    finally{btn.textContent='🍯 Generar los 3 lotes';btn.disabled=false;}
+  }
+  function nextPart(){if((S.part||1)>=5){alert('Llegaste a la Parte 5 (máximo).');return;}S.part=(S.part||1)+1;const sel=el('partSel');if(sel)sel.value=S.part;generate();}
+
+  function buildCastFromIdea(idea){const c={};SLOTS_ALL.forEach(s=>c[s]={name:idea.names[s],fruit:idea.fruits[s]});return c;}
+  function renderCast(cast){
+    S.cast=cast;const g=el('castGrid');g.innerHTML='';
+    SLOTS_ALL.forEach(s=>{
+      const opts=activeProducts().map(f=>`<option value="${f.n}" ${f.n===cast[s].fruit.n?'selected':''}>${f.n}</option>`).join('');
+      const row=document.createElement('div');row.className='cast-row';
+      row.innerHTML=`<div class="slot">${SLOT_ES_DEF[s]}</div><div class="ff"><div><label>Nombre (1 palabra)</label><input type="text" value="${cast[s].name}" data-glam-name="${s}"></div><div><label>Producto</label><select data-glam-fruit="${s}">${opts}</select></div></div>`;
+      g.appendChild(row);});
+  }
+  function readCast(){if(!S.cast)return;SLOTS_ALL.forEach(s=>{
+    const nm=document.querySelector(`[data-glam-name="${s}"]`),fr=document.querySelector(`[data-glam-fruit="${s}"]`);
+    if(nm)S.cast[s].name=(nm.value.trim().split(/\s+/)[0])||S.cast[s].name;
+    if(fr)S.cast[s].fruit=PRODUCTS.find(f=>f.n===fr.value)||S.cast[s].fruit;});}
+  function reroll(){const fr=castFruits(mulberry32(Date.now()));const c={};SLOTS_ALL.forEach(s=>c[s]={name:fr[s].n,fruit:fr[s]});renderCast(c);}
+
+  function renderIdeas(reset){
+    const grid=el('ideaGrid');const q=el('search').value.trim().toLowerCase();
+    let list=q?S.ideas.filter(i=>i.search.includes(q)):S.ideas;
+    if(reset){grid.innerHTML='';S.shown=0;S.filtered=list;}list=S.filtered||list;
+    const end=Math.min(S.shown+S.page,list.length);
+    for(let i=S.shown;i<end;i++){const idea=list[i];const div=document.createElement('div');
+      div.className='idea'+(S.selected&&S.selected.id===idea.id?' sel':'');
+      div.innerHTML=`<span class="idnum">#${idea.id}</span><p class="it">${idea.arch.e} ${idea.title}</p><p class="ix"><b>Gancho:</b> ${idea.g}</p><p class="ix"><b>Giro:</b> ${idea.x}</p><p class="ix"><b>Cliffhanger:</b> ${idea.c}</p>`;
+      div.addEventListener('click',()=>selectIdea(idea));grid.appendChild(div);}
+    S.shown=end;el('moreBtn').style.display=S.shown<list.length?'inline-block':'none';
+  }
+  function renderMore(){renderIdeas(false);}
+  function selectIdea(idea){
+    S.selected=idea;S.part=1;const ps=el('partSel');if(ps)ps.value=1;
+    el('customBox').classList.add('hidden');const sy=el('synopsis');sy.classList.remove('hidden');
+    sy.innerHTML=`<div class="st">${idea.arch.e} ${idea.title}</div><div class="sx"><b style="color:var(--gold2)">Gancho:</b> ${idea.g} · <b style="color:var(--gold2)">Giro:</b> ${idea.x} · <b style="color:var(--gold2)">Cliffhanger:</b> ${idea.c}</div>`;
+    renderCast(buildCastFromIdea(idea));renderIdeas(true);
+    el('castGrid').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function randomIdea(){selectIdea(S.ideas[Math.floor(Math.random()*S.ideas.length)]);}
+  function toggleCustom(){const box=el('customBox');box.classList.toggle('hidden');
+    if(!box.classList.contains('hidden')){S.selected=null;el('synopsis').classList.add('hidden');reroll();el('customPremise').focus();}}
+  function toggleIntimos(){
+    S.incluirIntimos=!S.incluirIntimos;el('intimToggle').setAttribute('aria-selected',S.incluirIntimos);
+    if(!S.incluirIntimos&&S.cast){const safe=activeProducts();SLOTS_ALL.forEach(s=>{if(S.cast[s].fruit.grupo==='intimo'){
+      const cand=safe.find(p=>!SLOTS_ALL.some(o=>S.cast[o].fruit.n===p.n))||safe[0];S.cast[s].fruit=cand;}});}
+    S.ideas=buildIdeas();el('ideaCount').textContent=`+${S.ideas.length} ideas offline`;
+    S.selected=null;el('synopsis').classList.add('hidden');renderIdeas(true);
+    if(S.cast)renderCast(S.cast);else reroll();
+  }
+  function setProv(p){S.prov=p;
+    document.querySelectorAll('[data-glam-prov]').forEach(e=>e.setAttribute('aria-selected',e.dataset.glamProv===p));
+    const box=el('apiBox');if(p==='offline'){box.classList.remove('show');return;}
+    box.classList.add('show');el('provName').textContent=p==='gemini'?'Gemini':'Claude';
+    el('apiModel').innerHTML=MODELS_DEF[p].map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  function copyEl(id,btn){const e=document.getElementById(id);_copyText(e.value!==undefined?e.value:e.textContent,btn);}
+  function syncClips(v){v=Math.max(12,Math.min(25,parseInt(v)||16));S.clips=v;
+    el('clipsNum').textContent=v;el('clipsRange').value=v;el('clipsInput').value=v;}
+
+  function init(){
+    el('clipsRange').addEventListener('input',e=>syncClips(e.target.value));
+    el('clipsInput').addEventListener('input',e=>syncClips(e.target.value));
+    let st;el('search').addEventListener('input',()=>{clearTimeout(st);st=setTimeout(()=>renderIdeas(true),150);});
+    S.ideas=buildIdeas();el('ideaCount').textContent=`+${S.ideas.length} ideas offline`;
+    renderIdeas(true);reroll();
+  }
+
+  return {S,init,generate,nextPart,reroll,randomIdea,toggleCustom,toggleIntimos,setProv,copyEl,renderMore};
+})();
+
+/* =================================================================
+   MÓDULO FRUTAS
+   ================================================================= */
+const FRUTAS = (function(){
+  const PREFIX='frutas';
+  const FRUITS=[
+   {n:"Pitaya",en:"pink dragon fruit",head:"pink dragon fruit with vibrant green leaf spikes and tiny seed speckles",small:false},
+   {n:"Coco",en:"coconut",head:"brown coconut shell with fibrous husk texture",small:false},
+   {n:"Fresa",en:"strawberry",head:"red strawberry with tiny yellow seeds and a green leafy crown",small:true},
+   {n:"Uva",en:"grape",head:"deep purple grape with glossy smooth skin",small:true},
+   {n:"Sandía",en:"watermelon",head:"green striped watermelon rind",small:false},
+   {n:"Plátano",en:"banana",head:"yellow banana peel with small brown spots",small:false},
+   {n:"Piña",en:"pineapple",head:"golden pineapple with diamond-pattern skin and a spiky green crown",small:false},
+   {n:"Naranja",en:"orange",head:"bright orange citrus peel with dimpled texture",small:false},
+   {n:"Manzana",en:"apple",head:"glossy red apple skin with a small green leaf and stem",small:false},
+   {n:"Durazno",en:"peach",head:"fuzzy peach skin in soft orange-pink tones",small:false},
+   {n:"Pera",en:"pear",head:"green pear skin with smooth gradient texture",small:false},
+   {n:"Kiwi",en:"kiwi",head:"fuzzy brown kiwi skin with bright green seeded hints",small:true},
+   {n:"Limón",en:"lime",head:"bright green lime peel with glossy dimpled texture",small:true},
+   {n:"Mango",en:"mango",head:"red-orange-yellow mango skin with smooth gradient",small:false},
+   {n:"Cereza",en:"cherry",head:"glossy deep red cherry skin with a thin stem",small:true},
+   {n:"Mora",en:"blackberry",head:"dark purple blackberry of glossy clustered druplets",small:true},
+   {n:"Granada",en:"pomegranate",head:"ruby-red pomegranate skin with a crown-shaped calyx",small:false},
+   {n:"Higo",en:"fig",head:"purple fig skin with soft matte texture",small:true},
+   {n:"Maracuyá",en:"passion fruit",head:"wrinkled purple passion fruit skin",small:true},
+   {n:"Guayaba",en:"guava",head:"pale green guava skin with soft pink interior hints",small:false},
+  ];
+  const STYLE_SCENE="photorealistic organic anthropomorphic fruit characters, cinematic photorealism, deep glossy skin with micro-displacement bumps, "+STYLE_SUFFIX_DEF+", fruit heads fully visible, no human faces";
+
+  const S={clips:16,prov:'offline',part:1,ideas:[],shown:0,page:24,selected:null,cast:null,filtered:null,lastBeat:null,partSeed:0};
+
+  function el(id){return document.getElementById(PREFIX+'-'+id);}
+  function castFruits(rng){
+    const pool=[...FRUITS];const take=l=>l.splice(Math.floor(rng()*l.length),1)[0];
+    const A=take(pool),B=take(pool);const sp=pool.filter(f=>f.small);const C=take(sp.length?sp:pool);
+    const ci=pool.indexOf(C);if(ci>=0)pool.splice(ci,1);const D=take(pool),E=take(pool),F=take(pool);
+    return {A,B,C,D,E,F};
+  }
+  function buildIdeas(){
+    const out=[],total=5200;
+    for(let i=0;i<total;i++){const rng=mulberry32(i*2654435761+99);const arch=ARCH_DEF[i%ARCH_DEF.length];
+      const fr=castFruits(rng);const names={};SLOTS_ALL.forEach(s=>names[s]=fr[s].n);
+      out.push({id:i+1,arch,fruits:fr,names,title:fill(arch.t,names),g:fill(arch.g,names),x:fill(arch.x,names),c:fill(arch.c,names),
+        search:(arch.t+" "+arch.g+" "+arch.x+" "+arch.c).toLowerCase()});}
+    return out;
+  }
+  function composeFull(slot,fr,name){const m=SLOT_DEF[slot];
+    return `${name}, character reference sheet, anthropomorphic ${fr.en} ${m.noun}, the entire head is a photorealistic organic ${fr.en}: ${fr.head}, deep glossy skin with micro-displacement bumps, large expressive eyes integrated into the fruit surface, ${m.hair}, wearing ${m.outfit}, ${m.expr}, ${VIEWS_DEF}, clean organized grid layout, multiple views on a clean white background, consistent character design, fruit head fully visible in every view, no human face, no human skin on the head, ${STYLE_SUFFIX_DEF}.`;}
+  function composeShort(slot,fr,name){const m=SLOT_DEF[slot];
+    return `${name} (anthropomorphic ${fr.en} ${m.noun}, photorealistic organic ${fr.head}, deep glossy skin with micro-displacement bumps, fruit head fully visible, no human face)`;}
+
+  function genOffline(cast,n,part){
+    part=part||1;const arc=buildArc(n,part);const names={};SLOTS_ALL.forEach(s=>names[s]=cast[s].name);
+    const rng=mulberry32((S.selected?S.selected.id:7)*100003+n*31+part*1000003);
+    const used=new Set();const lote2=[],lote3=[];let last=null;const tagP=`Parte ${part}`;
+    const contNota=part>1?` Retoma directamente desde el cliffhanger de la Parte ${part-1}, sin presentar de nuevo a los personajes; la tensión escala respecto a la parte anterior.`:"";
+    arc.forEach((beat,idx)=>{
+      const num=idx+1;const loc=pick(rng,LOCATIONS_DEF);const cam=fill(pick(rng,CAMERAS_DEF),names);const lig=pick(rng,LIGHTING_DEF);
+      const actRaw=ACTION_DEF[beat];const act=fill(actRaw,names);const opts=DLG_DEF[beat]||DLG_DEF.tension;
+      let tpl=pick(rng,opts);if(opts.length>1&&JSON.stringify(tpl)===last)tpl=pick(rng,opts);last=JSON.stringify(tpl);
+      const present=new Set();(actRaw.match(/\{([A-F])\}/g)||[]).forEach(m=>present.add(m[1]));tpl.forEach(([s])=>present.add(s));
+      const presentList=SLOTS_ALL.filter(s=>present.has(s));presentList.forEach(s=>used.add(s));
+      const dialogueAttr=tpl.map(([s,line])=>`${names[s]}: "${fill(line,names)}"`).join("; ");
+      const dialoguePlain=tpl.map(([s,line])=>fill(line,names)).join(" ");
+      const voices=presentList.filter(s=>tpl.some(([sp])=>sp===s)).map(s=>`${names[s]}=${SLOT_DEF[s].voz.emocao}/${SLOT_DEF[s].voz.tom}`).join(", ");
+      const namesTag=presentList.map(s=>`${names[s]} (${cast[s].fruit.en})`).join(", ");
+      const shortDesc=presentList.map(s=>composeShort(s,cast[s].fruit,names[s])).join("; ");
+      lote2.push(`${tagP} · Escena ${num} — ${BEAT_ES_DEF[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${namesTag} | Acción: ${act} | Cámara: ${cam} | Luz: ${lig}${idx===0?" | Continuidad:"+contNota:""}`);
+      const prompt=`${tagP} · Clip ${num} — ${BEAT_ES_DEF[beat]} | Estilo: ${STYLE_SCENE} | Lugar: ${loc} | Personajes: ${shortDesc} | Acción: ${act} | Guion: ${dialogueAttr} | Cámara: ${cam} | Luz: ${lig} | Duración: 8s | Voces: ${voices} | Avoid: ${AVOID_DEF} | Reglas: cabezas de fruta siempre visibles, sin rostros humanos, diálogo en español.${idx===0?contNota:""}`;
+      lote3.push({prompt,dialogue:dialoguePlain});
+    });
+    const lote1=SLOTS_ALL.filter(s=>used.has(s)).map(s=>composeFull(s,cast[s].fruit,cast[s].name));
+    return {lote1,lote2,lote3};
+  }
+
+  function buildApiPrompt(cast,n,part){
+    part=part||1;const reparto=SLOTS_ALL.map(s=>`${cast[s].name} (${SLOT_ES_DEF[s]}, ${cast[s].fruit.en})`).join(", ");
+    const premise=S.selected?`${S.selected.title}. Gancho: ${S.selected.g}. Giro: ${S.selected.x}. Cliffhanger: ${S.selected.c}.`:(el('customPremise').value||"Una novela dramática de frutas con traición y un cliffhanger.");
+    const cont=part>1?`Esta es la PARTE ${part}: continúa la historia justo desde el cliffhanger de la parte anterior, con el MISMO reparto, sin repetir la presentación.`:`Esta es la PARTE 1.`;
+    return `Eres un guionista de novelas virales de TikTok con personajes que son frutas antropomórficas, para animar en Veo 3 (clips de 8 segundos).\n\nREPARTO: ${reparto}\nPREMISA: ${premise}\n${cont}\nNÚMERO DE CLIPS: ${n}\n\nESTILO VISUAL OBLIGATORIO: ${STYLE_SCENE}.\n\nDevuelve EXCLUSIVAMENTE un objeto JSON válido:\n{"lote1":["..."],"lote2":["..."],"lote3":[{"prompt":"...","dialogue":"..."}]}\n\nREGLAS:\n- "lote2" y "lote3": exactamente ${n} elementos, UNA línea cada uno.\n- 3-4 personajes por clip, dialogue = EXACTAMENTE 19 palabras.\n- Diálogos en español, descripciones en inglés.\n- Misma fruta por personaje, cabeza de fruta siempre visible, nunca rostro humano.\n- Arco: ${part>1?'continuación, escalada, revelación, confrontación, amenaza, cliffhanger.':'presentación, gancho, escalada, revelación, confrontación, amenaza, cliffhanger.'}`;
+  }
+
+  function renderResults(data){
+    el('out1').textContent=(Array.isArray(data.lote1)?data.lote1.join("\n"):data.lote1);
+    el('out2').textContent=(Array.isArray(data.lote2)?data.lote2.join("\n"):data.lote2);
+    const items=data.lote3||[];
+    el('out3').textContent=items.map(it=>it.prompt).join("\n");
+    const counts=items.map(it=>it.dialogue?wc(it.dialogue):null).filter(c=>c!==null);
+    const chk=el('out3check');
+    if(counts.length){const okN=counts.filter(c=>c===19).length;const allOk=okN===counts.length;
+      chk.className='wc '+(allOk?'ok':'bad');chk.textContent=`${okN}/${counts.length} clips · 19 palabras${allOk?' ✓':' ✗'}`;}
+    else{chk.className='wc';chk.textContent='';}
+    const resultsEl=el('results');
+    resultsEl.querySelectorAll('.lote-head .lt .part-badge').forEach(e=>e.remove());
+    resultsEl.querySelectorAll('.lote-head .lt').forEach(lt=>{const b=document.createElement('span');b.className='part-badge';b.textContent='Parte '+(S.part||1);lt.appendChild(b);});
+    resultsEl.classList.remove('hidden');
+    resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  async function generate(){
+    readCast();const n=S.clips,part=S.part||1,btn=el('genBtn');
+    if(S.prov==='offline'){renderResults(genOffline(S.cast,n,part));return;}
+    const key=el('apiKey').value.trim();const model=el('apiModel').value;
+    if(!key){alert('Pega tu API key o cambia a modo Offline.');return;}
+    btn.textContent='⏳ Generando...';btn.disabled=true;
+    try{const prompt=buildApiPrompt(S.cast,n,part);
+      const text=S.prov==='gemini'?await _callGemini(prompt,key,model):await _callClaude(prompt,key,model);
+      renderResults(_parseApi(text));
+    }catch(err){alert('Falló la API ('+err.message+').\nGenerando en modo Offline como respaldo.');renderResults(genOffline(S.cast,n,part));}
+    finally{btn.textContent='🍉 Generar los 3 lotes';btn.disabled=false;}
+  }
+  function nextPart(){if((S.part||1)>=5){alert('Llegaste a la Parte 5 (máximo).');return;}S.part=(S.part||1)+1;const sel=el('partSel');if(sel)sel.value=S.part;generate();}
+
+  function buildCastFromIdea(idea){const c={};SLOTS_ALL.forEach(s=>c[s]={name:idea.names[s],fruit:idea.fruits[s]});return c;}
+  function renderCast(cast){
+    S.cast=cast;const g=el('castGrid');g.innerHTML='';
+    SLOTS_ALL.forEach(s=>{
+      const opts=FRUITS.map(f=>`<option value="${f.n}" ${f.n===cast[s].fruit.n?'selected':''}>${f.n}</option>`).join('');
+      const row=document.createElement('div');row.className='cast-row';
+      row.innerHTML=`<div class="slot">${SLOT_ES_DEF[s]}</div><div class="ff"><div><label>Nombre (1 palabra)</label><input type="text" value="${cast[s].name}" data-frutas-name="${s}"></div><div><label>Fruta</label><select data-frutas-fruit="${s}">${opts}</select></div></div>`;
+      g.appendChild(row);});
+  }
+  function readCast(){if(!S.cast)return;SLOTS_ALL.forEach(s=>{
+    const nm=document.querySelector(`[data-frutas-name="${s}"]`),fr=document.querySelector(`[data-frutas-fruit="${s}"]`);
+    if(nm)S.cast[s].name=(nm.value.trim().split(/\s+/)[0])||S.cast[s].name;
+    if(fr)S.cast[s].fruit=FRUITS.find(f=>f.n===fr.value)||S.cast[s].fruit;});}
+  function reroll(){const fr=castFruits(mulberry32(Date.now()));const c={};SLOTS_ALL.forEach(s=>c[s]={name:fr[s].n,fruit:fr[s]});renderCast(c);}
+
+  function renderIdeas(reset){
+    const grid=el('ideaGrid');const q=el('search').value.trim().toLowerCase();
+    let list=q?S.ideas.filter(i=>i.search.includes(q)):S.ideas;
+    if(reset){grid.innerHTML='';S.shown=0;S.filtered=list;}list=S.filtered||list;
+    const end=Math.min(S.shown+S.page,list.length);
+    for(let i=S.shown;i<end;i++){const idea=list[i];const div=document.createElement('div');
+      div.className='idea'+(S.selected&&S.selected.id===idea.id?' sel':'');
+      div.innerHTML=`<span class="idnum">#${idea.id}</span><p class="it">${idea.arch.e} ${idea.title}</p><p class="ix"><b>Gancho:</b> ${idea.g}</p><p class="ix"><b>Giro:</b> ${idea.x}</p><p class="ix"><b>Cliffhanger:</b> ${idea.c}</p>`;
+      div.addEventListener('click',()=>selectIdea(idea));grid.appendChild(div);}
+    S.shown=end;el('moreBtn').style.display=S.shown<list.length?'inline-block':'none';
+  }
+  function renderMore(){renderIdeas(false);}
+  function selectIdea(idea){
+    S.selected=idea;S.part=1;const ps=el('partSel');if(ps)ps.value=1;
+    el('customBox').classList.add('hidden');const sy=el('synopsis');sy.classList.remove('hidden');
+    sy.innerHTML=`<div class="st">${idea.arch.e} ${idea.title}</div><div class="sx"><b style="color:var(--gold2)">Gancho:</b> ${idea.g} · <b style="color:var(--gold2)">Giro:</b> ${idea.x} · <b style="color:var(--gold2)">Cliffhanger:</b> ${idea.c}</div>`;
+    renderCast(buildCastFromIdea(idea));renderIdeas(true);
+    el('castGrid').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function randomIdea(){selectIdea(S.ideas[Math.floor(Math.random()*S.ideas.length)]);}
+  function toggleCustom(){const box=el('customBox');box.classList.toggle('hidden');
+    if(!box.classList.contains('hidden')){S.selected=null;el('synopsis').classList.add('hidden');reroll();el('customPremise').focus();}}
+  function setProv(p){S.prov=p;
+    document.querySelectorAll('[data-frutas-prov]').forEach(e=>e.setAttribute('aria-selected',e.dataset.frutasProv===p));
+    const box=el('apiBox');if(p==='offline'){box.classList.remove('show');return;}
+    box.classList.add('show');el('provName').textContent=p==='gemini'?'Gemini':'Claude';
+    el('apiModel').innerHTML=MODELS_DEF[p].map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  function copyEl(id,btn){const e=document.getElementById(id);_copyText(e.value!==undefined?e.value:e.textContent,btn);}
+  function syncClips(v){v=Math.max(12,Math.min(25,parseInt(v)||16));S.clips=v;
+    el('clipsNum').textContent=v;el('clipsRange').value=v;el('clipsInput').value=v;}
+
+  function init(){
+    el('clipsRange').addEventListener('input',e=>syncClips(e.target.value));
+    el('clipsInput').addEventListener('input',e=>syncClips(e.target.value));
+    let st;el('search').addEventListener('input',()=>{clearTimeout(st);st=setTimeout(()=>renderIdeas(true),150);});
+    S.ideas=buildIdeas();el('ideaCount').textContent=`+${S.ideas.length} ideas offline`;
+    renderIdeas(true);reroll();
+  }
+
+  return {S,init,generate,nextPart,reroll,randomIdea,toggleCustom,setProv,copyEl,renderMore};
+})();
+
+/* =================================================================
+   PROTECCIONES ANTI-COPIA
+   ================================================================= */
+// 1. Bloquear clic derecho
+document.addEventListener('contextmenu',e=>{e.preventDefault();return false;});
+
+// 2. Bloquear atajos de teclado
+document.addEventListener('keydown',e=>{
+  // F12
+  if(e.key==='F12'){e.preventDefault();return false;}
+  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+  if(e.ctrlKey&&e.shiftKey&&['I','J','C','i','j','c'].includes(e.key)){e.preventDefault();return false;}
+  // Ctrl+U (ver fuente)
+  if(e.ctrlKey&&(e.key==='u'||e.key==='U')){e.preventDefault();return false;}
+  // Ctrl+S (guardar)
+  if(e.ctrlKey&&(e.key==='s'||e.key==='S')){e.preventDefault();return false;}
+  // Ctrl+C (copiar) — bloqueado globalmente, pero los botones de copiar internos siguen funcionando
+  // NO bloqueamos Ctrl+C para no romper la experiencia de uso normal de inputs
+});
+
+// 3. Bloquear arrastrar
+document.addEventListener('dragstart',e=>{e.preventDefault();return false;});
+
+// 4. Detección de DevTools (diferencia de tamaño de ventana)
+(function detectDevTools(){
+  const threshold=160;
+  function check(){
+    const w=window.outerWidth-window.innerWidth>threshold;
+    const h=window.outerHeight-window.innerHeight>threshold;
+    const overlay=document.getElementById('devtools-overlay');
+    if(w||h){overlay.style.display='flex';}else{overlay.style.display='none';}
+  }
+  setInterval(check,1500);
+  window.addEventListener('resize',check);
+})();
+
+// 5. Bloquear impresión
+window.addEventListener('beforeprint',e=>{e.preventDefault();});
+const printStyle=document.createElement('style');
+printStyle.textContent='@media print{body{display:none!important}}';
+document.head.appendChild(printStyle);
+
+// 6. Deshabilitar consola (método básico)
+(function(){
+  const noop=()=>{};
+  try{Object.defineProperty(window,'console',{get:()=>({log:noop,warn:noop,error:noop,info:noop,debug:noop,table:noop,clear:noop,dir:noop}),set:noop});}catch(e){}
+})();
+</script>
+</body>
+</html>
