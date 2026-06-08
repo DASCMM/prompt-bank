@@ -1,0 +1,2 @@
+# prompt-bank
+Automatization Prompts
