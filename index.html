@@ -36,16 +36,36 @@ window.fbSignIn=async(googleIdToken)=>{
   }catch(e){console.warn('Firebase Auth signin:',e);}
 };
 window.fbSignOut=async()=>{try{await signOut(_auth);}catch(e){}};
+// Lista de admins (debe coincidir con ADMIN_EMAILS en el script principal)
+const _ADMINS=['dascdev@gmail.com']; // agrega más emails aquí si hay más admins
 window.fbCheckAuth=async(email)=>{
-  if(email==='dascdev@gmail.com') return true;
+  if(_ADMINS.includes(email)) return true;
   try{
     const snap=await getDoc(doc(_db,'usuarios_autorizados',email));
     return snap.exists();
   }catch(e){console.error('Firebase auth check error:',e);return false;}
 };
-window.fbAddEmail=async(email)=>{
+window.fbAddEmail=async(email,permisos)=>{
   email=email.toLowerCase().trim();
-  await setDoc(doc(_db,'usuarios_autorizados',email),{email,addedAt:new Date().toISOString()});
+  await setDoc(doc(_db,'usuarios_autorizados',email),{
+    email,
+    addedAt:new Date().toISOString(),
+    permisos:permisos||{glam:true,frutas:true}
+  });
+};
+window.fbUpdatePermisos=async(email,mod,val)=>{
+  const ref=doc(_db,'usuarios_autorizados',email);
+  const snap=await getDoc(ref);
+  const permisos=snap.exists()?(snap.data().permisos||{glam:true,frutas:true}):{glam:true,frutas:true};
+  permisos[mod]=val;
+  await setDoc(ref,{...snap.data(),permisos},{merge:true});
+};
+window.fbGetUserPermisos=async(email)=>{
+  try{
+    const snap=await getDoc(doc(_db,'usuarios_autorizados',email));
+    if(snap.exists()) return snap.data().permisos||{glam:true,frutas:true};
+    return null;
+  }catch(e){return null;}
 };
 window.fbRemoveEmail=async(email)=>{
   await deleteDoc(doc(_db,'usuarios_autorizados',email));
@@ -275,6 +295,29 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .empty-state{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
 #adminTab{display:none}
 
+/* =================== PERMISOS Y MÓDULO BLOQUEADO =================== */
+.perm-checks{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0 6px;padding:12px 14px;
+  background:rgba(212,175,55,.05);border:1px solid var(--line);border-radius:10px}
+.perm-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;user-select:none}
+.perm-label input[type=checkbox]{width:17px;height:17px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.perm-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;border-radius:999px;
+  padding:3px 9px;margin:1px;font-weight:600;white-space:nowrap}
+.perm-on{background:rgba(212,175,55,.18);color:var(--gold2);border:1px solid rgba(212,175,55,.4)}
+.perm-off{background:rgba(58,50,32,.3);color:var(--muted);border:1px solid var(--line)}
+.perm-toggle{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;vertical-align:middle}
+.module-locked{display:none;position:absolute;inset:0;z-index:50;
+  background:radial-gradient(ellipse at center,rgba(10,8,5,.97),rgba(7,7,7,.99));
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px;border-radius:0}
+.module-locked.show{display:flex}
+.lock-icon{font-size:60px;margin-bottom:20px;filter:drop-shadow(0 0 24px rgba(212,175,55,.3))}
+.lock-title{font-family:Georgia,serif;font-style:italic;font-size:30px;font-weight:700;
+  background:linear-gradient(92deg,var(--gold3),var(--gold2));-webkit-background-clip:text;
+  background-clip:text;color:transparent;margin-bottom:12px}
+.lock-msg{font-size:14px;color:var(--muted);max-width:380px;line-height:1.7}
+.lock-contact{margin-top:18px;font-size:12px;color:#6b5d35;border:1px solid var(--line);
+  border-radius:999px;padding:6px 16px;display:inline-block}
+
 /* =================== OVERLAY ANTI-DEVTOOLS =================== */
 #devtools-overlay{
   display:none;position:fixed;inset:0;z-index:99999;
@@ -331,7 +374,14 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </nav>
 
   <!-- =================== MÓDULO GLAM (COSMÉTICOS) =================== -->
-  <div id="module-glam" class="module active">
+  <div id="module-glam" class="module active" style="position:relative">
+    <!-- OVERLAY DE ACCESO BLOQUEADO -->
+    <div class="module-locked" id="glam-locked">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">Sin acceso</div>
+      <div class="lock-msg">No tienes permiso para acceder al módulo <b style="color:var(--gold2)">GLAM · Cosméticos</b>.<br>Contacta al administrador para solicitar acceso.</div>
+      <span class="lock-contact">📧 Solicita acceso al administrador</span>
+    </div>
     <div class="wrap">
       <header class="brand">
         <div class="logo">JM BOTS GLAM</div>
@@ -450,7 +500,14 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </div>
 
   <!-- =================== MÓDULO FRUTAS =================== -->
-  <div id="module-frutas" class="module">
+  <div id="module-frutas" class="module" style="position:relative">
+    <!-- OVERLAY DE ACCESO BLOQUEADO -->
+    <div class="module-locked" id="frutas-locked">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">Sin acceso</div>
+      <div class="lock-msg">No tienes permiso para acceder al módulo <b style="color:var(--gold2)">FRUTAS</b>.<br>Contacta al administrador para solicitar acceso.</div>
+      <span class="lock-contact">📧 Solicita acceso al administrador</span>
+    </div>
     <div class="wrap">
       <header class="brand">
         <div class="logo">JM BOTS FRUTAS</div>
@@ -573,26 +630,38 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
       <section class="card">
         <div class="step"><div class="num">+</div>
-          <div><h2>Agregar usuario autorizado</h2><p>El usuario podrá iniciar sesión con su cuenta de Google</p></div>
+          <div><h2>Agregar usuario autorizado</h2><p>Define el email y qué módulos puede usar</p></div>
         </div>
         <div class="admin-form">
           <input type="email" id="adminEmailInput" placeholder="correo@gmail.com" autocomplete="off" />
           <button class="btn btn-primary" onclick="ADMIN.addEmail()">➕ Autorizar acceso</button>
+        </div>
+        <div class="perm-checks">
+          <label class="perm-label">
+            <input type="checkbox" id="permGlam" checked>
+            🍯 GLAM · Cosméticos
+          </label>
+          <label class="perm-label">
+            <input type="checkbox" id="permFrutas" checked>
+            🍉 FRUTAS
+          </label>
         </div>
         <div class="status-msg" id="adminStatus"></div>
       </section>
 
       <section class="card">
         <div class="step"><div class="num">👥</div>
-          <div><h2>Usuarios autorizados</h2><p>Lista completa de emails con acceso · haz clic en ❌ para revocar</p></div>
+          <div><h2>Usuarios autorizados</h2><p>Ajusta permisos de módulo con los checkboxes · ❌ para revocar acceso total</p></div>
         </div>
         <div id="adminLoading" style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">⏳ Cargando lista de usuarios...</div>
         <table class="admin-table" id="adminTable" style="display:none">
           <thead>
             <tr>
               <th>#</th>
-              <th>Email autorizado</th>
-              <th>Fecha de autorización</th>
+              <th>Email</th>
+              <th style="text-align:center">🍯 GLAM</th>
+              <th style="text-align:center">🍉 FRUTAS</th>
+              <th>Agregado</th>
               <th>Acción</th>
             </tr>
           </thead>
@@ -617,7 +686,13 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
    AUTH — Google Sign-In + lista de emails autorizados
    ================================================================= */
 const GOOGLE_CLIENT_ID = '899116968086-g55lhnfiub2r2ep8jchpo0ul609tunbq.apps.googleusercontent.com';
-const ADMIN_EMAIL = 'dascdev@gmail.com';
+
+// ★★★ ADMINISTRADORES — agrega o quita emails aquí ★★★
+// Todos los admins ven el panel ⚙️ y pueden gestionar usuarios
+const ADMIN_EMAILS = [
+  'dascdev@gmail.com',      // admin principal
+  // 'otropadmin@gmail.com', // ← descomenta para agregar otro admin
+];
 
 /* =================================================================
    GOOGLE SIGN-IN
@@ -687,15 +762,43 @@ function showApp(user){
   document.getElementById('app').style.display='block';
   document.getElementById('userAvatar').src=user.picture||'';
   document.getElementById('userName').textContent=user.name||user.email||'';
-  // Mostrar tab Admin solo para el administrador
   const adminTab=document.getElementById('tabAdmin');
-  if(email===ADMIN_EMAIL){
+  if(ADMIN_EMAILS.includes(email)){
+    // Admin: acceso total a todo
     adminTab.style.display='inline-flex';
+    applyPermisos({glam:true,frutas:true});
   } else {
     adminTab.style.display='none';
+    // Usuario normal: cargar permisos desde Firestore
+    window.fbGetUserPermisos(email)
+      .then(p=>applyPermisos(p||{glam:true,frutas:true}))
+      .catch(()=>applyPermisos({glam:true,frutas:true}));
   }
   GLAM.init();
   FRUTAS.init();
+}
+
+function applyPermisos(p){
+  const gTab=document.getElementById('tabGlam');
+  const fTab=document.getElementById('tabFrutas');
+  const gLock=document.getElementById('glam-locked');
+  const fLock=document.getElementById('frutas-locked');
+  // Aplicar visibilidad de tabs y overlays
+  if(p&&p.glam){gTab.style.display='';gLock.classList.remove('show');}
+  else{gTab.style.display='none';gLock.classList.add('show');}
+  if(p&&p.frutas){fTab.style.display='';fLock.classList.remove('show');}
+  else{fTab.style.display='none';fLock.classList.add('show');}
+  // Navegar al primer módulo disponible
+  const cur=document.querySelector('.module.active');
+  const curId=cur?cur.id:'';
+  if(curId==='module-glam'&&(!p||!p.glam)){
+    if(p&&p.frutas) switchModule('frutas');
+  } else if(curId==='module-frutas'&&(!p||!p.frutas)){
+    if(p&&p.glam) switchModule('glam');
+  } else if(!cur||curId===''){
+    if(p&&p.glam) switchModule('glam');
+    else if(p&&p.frutas) switchModule('frutas');
+  }
 }
 
 function doLogout(){
@@ -741,15 +844,25 @@ const ADMIN = {
     const email=input.value.trim().toLowerCase();
     if(!email||!email.includes('@')){
       status.textContent='⚠️ Ingresa un email válido.';
-      status.className='status-msg err';
-      return;
+      status.className='status-msg err'; return;
+    }
+    const permisos={
+      glam:document.getElementById('permGlam').checked,
+      frutas:document.getElementById('permFrutas').checked
+    };
+    if(!permisos.glam&&!permisos.frutas){
+      status.textContent='⚠️ Selecciona al menos un módulo (GLAM o FRUTAS).';
+      status.className='status-msg err'; return;
     }
     try{
       status.textContent='⏳ Guardando...';
       status.className='status-msg ok';
-      await window.fbAddEmail(email);
+      await window.fbAddEmail(email,permisos);
       input.value='';
-      status.textContent='✅ '+email+' ahora tiene acceso.';
+      const mods=[];
+      if(permisos.glam) mods.push('🍯 GLAM');
+      if(permisos.frutas) mods.push('🍉 FRUTAS');
+      status.textContent='✅ '+email+' autorizado para: '+mods.join(' + ');
       status.className='status-msg ok';
       await this.loadList();
     }catch(e){
@@ -757,8 +870,21 @@ const ADMIN = {
       status.className='status-msg err';
     }
   },
+  async togglePerm(email,mod,checked){
+    const status=document.getElementById('adminStatus');
+    try{
+      await window.fbUpdatePermisos(email,mod,checked);
+      const icon=mod==='glam'?'🍯 GLAM':'🍉 FRUTAS';
+      const accion=checked?'activado':'desactivado';
+      status.textContent=(checked?'✅':'🚫')+' '+icon+' '+accion+' para '+email;
+      status.className='status-msg ok';
+    }catch(e){
+      status.textContent='❌ Error al actualizar: '+e.message;
+      status.className='status-msg err';
+    }
+  },
   async removeEmail(email){
-    if(!confirm('¿Revocar acceso a '+email+'?')) return;
+    if(!confirm('¿Revocar acceso completo a '+email+'?')) return;
     const status=document.getElementById('adminStatus');
     try{
       await window.fbRemoveEmail(email);
@@ -775,26 +901,29 @@ const ADMIN = {
     const table=document.getElementById('adminTable');
     const tbody=document.getElementById('adminTableBody');
     const empty=document.getElementById('adminEmpty');
-    loading.style.display='block';
-    table.style.display='none';
-    empty.classList.add('hidden');
+    loading.style.display='block'; loading.textContent='⏳ Cargando lista de usuarios...';
+    table.style.display='none'; empty.classList.add('hidden');
     try{
       const emails=await window.fbGetEmails();
       tbody.innerHTML='';
       if(emails.length===0){
         loading.style.display='none';
-        empty.classList.remove('hidden');
-        return;
+        empty.classList.remove('hidden'); return;
       }
       emails.sort((a,b)=>a.email.localeCompare(b.email));
       emails.forEach((u,i)=>{
+        const p=u.permisos||{glam:true,frutas:true};
         const fecha=u.addedAt?new Date(u.addedAt).toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'}):'-';
         const tr=document.createElement('tr');
+        const chkG=`<input type="checkbox" class="perm-toggle" ${p.glam?'checked':''} onchange="ADMIN.togglePerm('${u.email}','glam',this.checked)" title="Acceso GLAM">`;
+        const chkF=`<input type="checkbox" class="perm-toggle" ${p.frutas?'checked':''} onchange="ADMIN.togglePerm('${u.email}','frutas',this.checked)" title="Acceso FRUTAS">`;
         tr.innerHTML=`
           <td style="color:var(--muted);font-size:12px">${i+1}</td>
           <td class="admin-email-cell">${u.email}</td>
+          <td style="text-align:center">${chkG}</td>
+          <td style="text-align:center">${chkF}</td>
           <td class="admin-date-cell">${fecha}</td>
-          <td><button class="btn-danger" onclick="ADMIN.removeEmail('${u.email}')">❌ Revocar</button></td>
+          <td><button class="btn-danger" onclick="ADMIN.removeEmail('${u.email}')">&#10006;</button></td>
         `;
         tbody.appendChild(tr);
       });
