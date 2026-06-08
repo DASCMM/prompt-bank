@@ -37,7 +37,7 @@ window.fbSignIn=async(googleIdToken)=>{
 };
 window.fbSignOut=async()=>{try{await signOut(_auth);}catch(e){}};
 // Lista de admins (debe coincidir con ADMIN_EMAILS en el script principal)
-const _ADMINS=['dascdev@gmail.com']; // agrega más emails aquí si hay más admins
+const _ADMINS=['dascdev@gmail.com','jonatanmonzon13@gmail.com']; // admins con acceso total
 window.fbCheckAuth=async(email)=>{
   if(_ADMINS.includes(email)) return true;
   try{
@@ -690,8 +690,8 @@ const GOOGLE_CLIENT_ID = '899116968086-g55lhnfiub2r2ep8jchpo0ul609tunbq.apps.goo
 // ★★★ ADMINISTRADORES — agrega o quita emails aquí ★★★
 // Todos los admins ven el panel ⚙️ y pueden gestionar usuarios
 const ADMIN_EMAILS = [
-  'dascdev@gmail.com',      // admin principal
-  // 'otropadmin@gmail.com', // ← descomenta para agregar otro admin
+  'dascdev@gmail.com',           // admin principal
+  'jonatanmonzon13@gmail.com',   // admin secundario
 ];
 
 /* =================================================================
