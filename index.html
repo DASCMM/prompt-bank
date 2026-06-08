@@ -11,6 +11,51 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!-- =================== FIREBASE SDK =================== -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { getAuth, GoogleAuthProvider, signInWithCredential, signOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+const _fc={
+  apiKey:"AIzaSyDj-fLDml9q1AVCwMPJBZ-KpjZpZObE6xs",
+  authDomain:"jm-y-ds-bots.firebaseapp.com",
+  projectId:"jm-y-ds-bots",
+  storageBucket:"jm-y-ds-bots.firebasestorage.app",
+  messagingSenderId:"899116968086",
+  appId:"1:899116968086:web:ad3aa1636d31cfba4d7ab7"
+};
+const _app=initializeApp(_fc);
+const _db=getFirestore(_app);
+const _auth=getAuth(_app);
+window.fbReady=true;
+window.fbSignIn=async(googleIdToken)=>{
+  try{
+    const credential=GoogleAuthProvider.credential(googleIdToken);
+    await signInWithCredential(_auth,credential);
+  }catch(e){console.warn('Firebase Auth signin:',e);}
+};
+window.fbSignOut=async()=>{try{await signOut(_auth);}catch(e){}};
+window.fbCheckAuth=async(email)=>{
+  if(email==='dascdev@gmail.com') return true;
+  try{
+    const snap=await getDoc(doc(_db,'usuarios_autorizados',email));
+    return snap.exists();
+  }catch(e){console.error('Firebase auth check error:',e);return false;}
+};
+window.fbAddEmail=async(email)=>{
+  email=email.toLowerCase().trim();
+  await setDoc(doc(_db,'usuarios_autorizados',email),{email,addedAt:new Date().toISOString()});
+};
+window.fbRemoveEmail=async(email)=>{
+  await deleteDoc(doc(_db,'usuarios_autorizados',email));
+};
+window.fbGetEmails=async()=>{
+  const snap=await getDocs(collection(_db,'usuarios_autorizados'));
+  return snap.docs.map(d=>d.data());
+};
+document.dispatchEvent(new CustomEvent('fb-ready'));
+</script>
 <style>
 /* =================== VARIABLES GLOBALES =================== */
 :root{
@@ -209,6 +254,27 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .part-badge{display:inline-block;font-size:12px;color:#0e0a02;font-weight:700;border-radius:999px;
   padding:4px 12px;margin-left:8px;background:linear-gradient(135deg,var(--gold2),var(--gold))}
 
+/* =================== ADMIN PANEL =================== */
+.admin-table{width:100%;border-collapse:collapse;margin:14px 0}
+.admin-table th{text-align:left;font-size:12px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;
+  padding:10px 12px;border-bottom:1px solid var(--line)}
+.admin-table td{padding:11px 12px;border-bottom:1px solid rgba(58,50,32,.35);font-size:14px;vertical-align:middle}
+.admin-table tr:hover td{background:rgba(212,175,55,.04)}
+.admin-form{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}
+.admin-form input{flex:1;min-width:220px}
+.status-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin:10px 0;display:none}
+.status-msg.ok{background:rgba(232,199,90,.12);color:var(--ok);border:1px solid rgba(232,199,90,.3);display:block}
+.status-msg.err{background:rgba(192,57,43,.12);color:#e08a80;border:1px solid rgba(192,57,43,.3);display:block}
+.admin-badge{display:inline-block;font-size:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#0e0a02;border-radius:999px;padding:2px 8px;margin-left:6px;font-weight:700;vertical-align:middle}
+.btn-danger{background:transparent;border:1px solid rgba(192,57,43,.5);color:#e08a80;
+  border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-danger:hover{background:rgba(192,57,43,.18);border-color:var(--bad)}
+.admin-email-cell{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--gold2)}
+.admin-date-cell{font-size:12px;color:var(--muted)}
+.empty-state{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
+#adminTab{display:none}
+
 /* =================== OVERLAY ANTI-DEVTOOLS =================== */
 #devtools-overlay{
   display:none;position:fixed;inset:0;z-index:99999;
@@ -253,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     <div class="top-tabs">
       <button class="tab-btn active" onclick="switchModule('glam')" id="tabGlam">🍯 GLAM · Cosméticos</button>
       <button class="tab-btn" onclick="switchModule('frutas')" id="tabFrutas">🍉 FRUTAS</button>
+      <button class="tab-btn" onclick="switchModule('admin')" id="tabAdmin" style="display:none">⚙️ Admin</button>
     </div>
     <div class="top-right">
       <div class="user-info">
@@ -494,6 +561,55 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       </div>
     </div>
   </div>
+
+  <!-- =================== MÓDULO ADMIN =================== -->
+  <div id="module-admin" class="module">
+    <div class="wrap">
+      <header class="brand">
+        <div class="logo">Panel Admin<span class="admin-badge">ADMIN</span></div>
+        <div class="tag">Gestión de accesos · JM BOTS Prompt Bank</div>
+        <div><span class="ribbon">Solo visible para el administrador</span></div>
+      </header>
+
+      <section class="card">
+        <div class="step"><div class="num">+</div>
+          <div><h2>Agregar usuario autorizado</h2><p>El usuario podrá iniciar sesión con su cuenta de Google</p></div>
+        </div>
+        <div class="admin-form">
+          <input type="email" id="adminEmailInput" placeholder="correo@gmail.com" autocomplete="off" />
+          <button class="btn btn-primary" onclick="ADMIN.addEmail()">➕ Autorizar acceso</button>
+        </div>
+        <div class="status-msg" id="adminStatus"></div>
+      </section>
+
+      <section class="card">
+        <div class="step"><div class="num">👥</div>
+          <div><h2>Usuarios autorizados</h2><p>Lista completa de emails con acceso · haz clic en ❌ para revocar</p></div>
+        </div>
+        <div id="adminLoading" style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">⏳ Cargando lista de usuarios...</div>
+        <table class="admin-table" id="adminTable" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email autorizado</th>
+              <th>Fecha de autorización</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="adminEmpty">📭 No hay usuarios autorizados todavía. Agrega el primero arriba.</div>
+        <div style="margin-top:14px">
+          <button class="btn btn-ghost btn-sm" onclick="ADMIN.loadList()">🔄 Actualizar lista</button>
+        </div>
+      </section>
+
+      <div class="footer">Panel exclusivo del administrador · <b style="color:var(--gold2)">dascdev@gmail.com</b><br>
+        Los cambios se aplican en tiempo real — el usuario afectado lo notará en su próximo login.
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -501,10 +617,11 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
    AUTH — Google Sign-In + lista de emails autorizados
    ================================================================= */
 const GOOGLE_CLIENT_ID = '899116968086-g55lhnfiub2r2ep8jchpo0ul609tunbq.apps.googleusercontent.com';
+const ADMIN_EMAIL = 'dascdev@gmail.com';
 
-// ★★★ AUTORIZACIÓN GESTIONADA EN GOOGLE CLOUD CONSOLE ★★★
-// Para dar acceso, agrega los correos en la pestaña "Pantalla de consentimiento de OAuth" -> "Usuarios de prueba" de tu proyecto de Google.
-
+/* =================================================================
+   GOOGLE SIGN-IN
+   ================================================================= */
 function initGoogleSignIn(){
   if(typeof google==='undefined'||!google.accounts){
     setTimeout(initGoogleSignIn,300);return;
@@ -526,26 +643,57 @@ function decodeJwt(token){
   return JSON.parse(json);
 }
 
-function handleCredentialResponse(response){
+async function handleCredentialResponse(response){
   try{
     const user=decodeJwt(response.credential);
     const email=(user.email||'').toLowerCase();
-    
-    // Al delegar a Google, cualquier token válido que llegue aquí ya fue autorizado por Google Cloud Console
+    const errEl=document.getElementById('loginError');
+    errEl.style.display='none';
+    errEl.className='login-error';
+
+    // Esperar a que Firebase esté listo
+    if(!window.fbReady){
+      await new Promise(r=>document.addEventListener('fb-ready',r,{once:true}));
+    }
+
+    // 1) Autenticar en Firebase Auth con el token de Google
+    //    (necesario para que las reglas de Firestore verifiquen identidad)
+    await window.fbSignIn(response.credential);
+
+    // 2) Verificar si el email está autorizado en Firestore
+    const autorizado = await window.fbCheckAuth(email);
+
+    if(!autorizado){
+      // No autorizado: cerrar sesión de Firebase Auth y mostrar error
+      await window.fbSignOut();
+      if(typeof google!=='undefined'&&google.accounts) google.accounts.id.disableAutoSelect();
+      errEl.textContent='⚠️ Tu email ('+email+') no está autorizado. Contacta al administrador.';
+      errEl.style.display='block';
+      return;
+    }
+
+    // 3) Guardar sesión y mostrar app
     sessionStorage.setItem('jm_user',JSON.stringify({name:user.name,email:email,picture:user.picture,token:response.credential}));
     showApp(user);
   }catch(e){
-    console.error('Error al decodificar token:',e);
+    console.error('Error al iniciar sesión:',e);
     alert('Error al iniciar sesión. Intenta de nuevo.');
   }
 }
 
 function showApp(user){
+  const email=(user.email||'').toLowerCase();
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('userAvatar').src=user.picture||'';
   document.getElementById('userName').textContent=user.name||user.email||'';
-  // init modules
+  // Mostrar tab Admin solo para el administrador
+  const adminTab=document.getElementById('tabAdmin');
+  if(email===ADMIN_EMAIL){
+    adminTab.style.display='inline-flex';
+  } else {
+    adminTab.style.display='none';
+  }
   GLAM.init();
   FRUTAS.init();
 }
@@ -553,27 +701,124 @@ function showApp(user){
 function doLogout(){
   sessionStorage.removeItem('jm_user');
   if(typeof google!=='undefined'&&google.accounts) google.accounts.id.disableAutoSelect();
+  if(window.fbSignOut) window.fbSignOut(); // Cerrar sesión de Firebase Auth
   document.getElementById('app').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginError').style.display='none';
+  document.getElementById('tabAdmin').style.display='none';
 }
 
-// Check session
+// Restaurar sesión guardada
 (function(){
   const saved=sessionStorage.getItem('jm_user');
-  if(saved){try{showApp(JSON.parse(saved));}catch(e){sessionStorage.removeItem('jm_user');}}
+  if(saved){try{
+    const u=JSON.parse(saved);
+    // Verificar autorización antes de restaurar sesión
+    if(!window.fbReady){
+      document.addEventListener('fb-ready',()=>{
+        window.fbCheckAuth(u.email).then(ok=>{
+          if(ok) showApp(u);
+          else sessionStorage.removeItem('jm_user');
+        });
+      },{once:true});
+    } else {
+      window.fbCheckAuth(u.email).then(ok=>{
+        if(ok) showApp(u);
+        else sessionStorage.removeItem('jm_user');
+      });
+    }
+  }catch(e){sessionStorage.removeItem('jm_user');}}
   initGoogleSignIn();
 })();
 
 /* =================================================================
-   MODULE TABS
+   ADMIN PANEL
    ================================================================= */
+const ADMIN = {
+  async addEmail(){
+    const input=document.getElementById('adminEmailInput');
+    const status=document.getElementById('adminStatus');
+    const email=input.value.trim().toLowerCase();
+    if(!email||!email.includes('@')){
+      status.textContent='⚠️ Ingresa un email válido.';
+      status.className='status-msg err';
+      return;
+    }
+    try{
+      status.textContent='⏳ Guardando...';
+      status.className='status-msg ok';
+      await window.fbAddEmail(email);
+      input.value='';
+      status.textContent='✅ '+email+' ahora tiene acceso.';
+      status.className='status-msg ok';
+      await this.loadList();
+    }catch(e){
+      status.textContent='❌ Error al guardar: '+e.message;
+      status.className='status-msg err';
+    }
+  },
+  async removeEmail(email){
+    if(!confirm('¿Revocar acceso a '+email+'?')) return;
+    const status=document.getElementById('adminStatus');
+    try{
+      await window.fbRemoveEmail(email);
+      status.textContent='🚫 Acceso revocado: '+email;
+      status.className='status-msg ok';
+      await this.loadList();
+    }catch(e){
+      status.textContent='❌ Error al eliminar: '+e.message;
+      status.className='status-msg err';
+    }
+  },
+  async loadList(){
+    const loading=document.getElementById('adminLoading');
+    const table=document.getElementById('adminTable');
+    const tbody=document.getElementById('adminTableBody');
+    const empty=document.getElementById('adminEmpty');
+    loading.style.display='block';
+    table.style.display='none';
+    empty.classList.add('hidden');
+    try{
+      const emails=await window.fbGetEmails();
+      tbody.innerHTML='';
+      if(emails.length===0){
+        loading.style.display='none';
+        empty.classList.remove('hidden');
+        return;
+      }
+      emails.sort((a,b)=>a.email.localeCompare(b.email));
+      emails.forEach((u,i)=>{
+        const fecha=u.addedAt?new Date(u.addedAt).toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'}):'-';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td style="color:var(--muted);font-size:12px">${i+1}</td>
+          <td class="admin-email-cell">${u.email}</td>
+          <td class="admin-date-cell">${fecha}</td>
+          <td><button class="btn-danger" onclick="ADMIN.removeEmail('${u.email}')">❌ Revocar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      loading.style.display='none';
+      table.style.display='table';
+    }catch(e){
+      loading.textContent='❌ Error al cargar: '+e.message;
+    }
+  }
+};
+
+// Cargar lista cuando se activa el módulo admin
+const _origSwitch=typeof switchModule!=='undefined'?switchModule:null;
 function switchModule(mod){
   document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
   document.getElementById('module-'+mod).classList.add('active');
-  document.getElementById('tab'+mod.charAt(0).toUpperCase()+mod.slice(1)).classList.add('active');
+  const tabId='tab'+mod.charAt(0).toUpperCase()+mod.slice(1);
+  const tabEl=document.getElementById(tabId);
+  if(tabEl) tabEl.classList.add('active');
+  if(mod==='admin') ADMIN.loadList();
 }
+
+
 
 /* =================================================================
    SHARED UTILITIES
